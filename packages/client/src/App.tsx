@@ -4,7 +4,8 @@ import { api } from "./api/client.js";
 import { getToken, setToken } from "./api/token.js";
 import { Scene } from "./map/Scene.js";
 import type { TileRef } from "./map/HexTiles.js";
-import { useFleet } from "./store/useFleet.js";
+import { persistSnapshots, registerPwa, restoreSnapshotIfOffline } from "./pwa.js";
+import { selectCanCommand, useFleet } from "./store/useFleet.js";
 import { AlertStack, useAlertSounds } from "./ui/AlertStack.js";
 import { CommandBar, useCommands } from "./ui/CommandBar.js";
 import { Header } from "./ui/Header.js";
@@ -12,6 +13,9 @@ import { SidePanel } from "./ui/SidePanel.js";
 import { TokenGate } from "./ui/TokenGate.js";
 import { Toasts, reportError } from "./ui/Toasts.js";
 import { Tray } from "./ui/Tray.js";
+import { Banner } from "./ui/mobile/Banner.js";
+import { Sheet } from "./ui/mobile/Sheet.js";
+import { TabBar } from "./ui/mobile/TabBar.js";
 import { useIsMobile } from "./util/useIsMobile.js";
 import "./theme.css";
 
@@ -23,11 +27,19 @@ export function App() {
   const setPanel = useFleet((s) => s.setPanel);
   const hasSnapshot = useFleet((s) => s.hasSnapshot);
   const mode = useFleet((s) => s.mode);
+  const sheet = useFleet((s) => s.sheet);
+  const canCommand = useFleet(selectCanCommand);
   const commands = useCommands();
   useAlertSounds();
 
   useEffect(() => {
+    void registerPwa();
+    return persistSnapshots();
+  }, []);
+
+  useEffect(() => {
     if (!hasToken) return;
+    void restoreSnapshotIfOffline();
     return connectWs({
       onAuthError: () => {
         setToken(null);
@@ -100,45 +112,48 @@ export function App() {
   }, [commands, toggleLegend]);
 
   // move mode: a tile click relocates the unit being moved
-  const onTileClick = useCallback(
-    (tile: TileRef) => {
-      const s = useFleet.getState();
-      if (s.mode !== "move" || !s.moveUnitId) return false;
-      const unit = s.units[s.moveUnitId];
-      if (!unit) return false;
-      const occupied = Object.values(s.units).find((u) => u.hex[0] === tile.hex[0] && u.hex[1] === tile.hex[1] && u.id !== unit.id);
-      if (occupied) {
-        s.toast({ kind: "error", text: `${occupied.name} is already on that hex.` });
-        return true;
-      }
-      const body = tile.project.id === unit.projectId ? { hex: tile.hex } : { projectId: tile.project.id, hex: tile.hex };
-      api.units
-        .patch(unit.id, body)
-        .then(() => {
-          s.toast({ kind: "ok", text: `${unit.name} moved${tile.project.id !== unit.projectId ? ` to ${tile.project.name}` : ""}.` });
-          s.exitMove();
-          s.select([unit.id]);
-        })
-        .catch(reportError);
+  const onTileClick = useCallback((tile: TileRef) => {
+    const s = useFleet.getState();
+    if (s.mode !== "move" || !s.moveUnitId) return false;
+    const unit = s.units[s.moveUnitId];
+    if (!unit) return false;
+    const occupied = Object.values(s.units).find((u) => u.hex[0] === tile.hex[0] && u.hex[1] === tile.hex[1] && u.id !== unit.id);
+    if (occupied) {
+      s.toast({ kind: "error", text: `${occupied.name} is already on that hex.` });
       return true;
-    },
-    [],
-  );
+    }
+    const body = tile.project.id === unit.projectId ? { hex: tile.hex } : { projectId: tile.project.id, hex: tile.hex };
+    api.units
+      .patch(unit.id, body)
+      .then(() => {
+        s.toast({ kind: "ok", text: `${unit.name} moved${tile.project.id !== unit.projectId ? ` to ${tile.project.name}` : ""}.` });
+        s.exitMove();
+        s.select([unit.id]);
+      })
+      .catch(reportError);
+    return true;
+  }, []);
 
   if (!hasToken) return <TokenGate onDone={() => setHasToken(true)} error={authError} />;
 
+  const sheetOpen = mobile && sheet !== "closed" && !(sheet === "detail" && panel.kind === "none");
+  const sheetPx = sheetOpen ? Math.round(window.innerHeight * (sheet === "detail" ? 0.52 : 0.78)) : 0;
+
   return (
-    <div className={`app${mobile ? " mobile" : ""}${mode === "move" ? " move-mode" : ""}`}>
-      <Header onLegend={toggleLegend} legendOpen={panel.kind === "legend"} />
+    <div className={`app${mobile ? " mobile" : ""}${mode === "move" ? " move-mode" : ""}${canCommand ? "" : " readonly"}`}>
+      <Header onLegend={toggleLegend} legendOpen={panel.kind === "legend"} compact={mobile} />
       <main className="stage">
-        {hasSnapshot ? <Scene mobile={mobile} onTileClick={onTileClick} /> : <div className="empty" style={{ padding: 24 }}>Connecting to the fleet server…</div>}
+        {hasSnapshot ? <Scene mobile={mobile} onTileClick={onTileClick} focusOffsetY={mobile ? sheetPx / 2 : 0} /> : <div className="empty" style={{ padding: 24 }}>Connecting to the fleet server…</div>}
         {!mobile && <CommandBar />}
-        <AlertStack shifted={panel.kind !== "none"} />
-        <SidePanel />
+        {!mobile && <AlertStack shifted={panel.kind !== "none"} />}
+        {!mobile && <SidePanel />}
+        {mobile && <Banner />}
+        {mobile && <Sheet />}
         <Toasts />
-        {mode === "move" && <div className="mode-banner">Move mode: click a free hex · Esc to cancel</div>}
+        {mode === "move" && <div className="mode-banner">Move mode: {mobile ? "tap" : "click"} a free hex · {mobile ? "" : "Esc to cancel"}</div>}
+        {!canCommand && hasSnapshot && <div className="mode-banner offline">Offline: showing the last known state, commands disabled</div>}
       </main>
-      <Tray />
+      {mobile ? <TabBar /> : <Tray />}
     </div>
   );
 }

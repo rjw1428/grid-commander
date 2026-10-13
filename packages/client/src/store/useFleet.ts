@@ -52,6 +52,10 @@ export interface FleetState {
   banner: Alert | null;
   soundOn: boolean;
   toasts: Toast[];
+  /** when the snapshot came from the offline cache */
+  cachedAt: number | null;
+  /** mobile: shift-click replacement */
+  multi: boolean;
   /** unit being moved in move mode (first selection when the mode was entered) */
   moveUnitId: string | null;
 
@@ -76,6 +80,8 @@ export interface FleetState {
   dismissToast: (id: number) => void;
   enterMove: (unitId: string) => void;
   exitMove: () => void;
+  setCachedAt: (at: number | null) => void;
+  setMulti: (on: boolean) => void;
 }
 
 export interface Toast {
@@ -108,6 +114,8 @@ export const useFleet = create<FleetState>((set, get) => ({
   banner: null,
   soundOn: false,
   toasts: [],
+  cachedAt: null,
+  multi: false,
   moveUnitId: null,
 
   applySnapshot: (s) =>
@@ -120,6 +128,7 @@ export const useFleet = create<FleetState>((set, get) => ({
       settings: s.settings,
       server: s.server,
       hasSnapshot: true,
+      cachedAt: null,
       selection: st.selection.filter((id) => s.units.some((u) => u.id === id)),
     })),
 
@@ -239,7 +248,12 @@ export const useFleet = create<FleetState>((set, get) => ({
   dismissToast: (id) => set((st) => ({ toasts: st.toasts.filter((t) => t.id !== id) })),
   enterMove: (moveUnitId) => set({ mode: "move", moveUnitId }),
   exitMove: () => set({ mode: "idle", moveUnitId: null }),
+  setCachedAt: (cachedAt) => set({ cachedAt }),
+  setMulti: (multi) => set({ multi, mode: multi ? "multi" : "idle" }),
 }));
+
+/** Commands are only possible with a live socket. */
+export const selectCanCommand = (s: FleetState) => s.connection === "live";
 
 // ----------------------------------------------------------------------------- selectors
 

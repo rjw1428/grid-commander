@@ -62,3 +62,12 @@ Recorded as the build progresses. Newest at the bottom.
 - **`Messages` command** opens a fleet-wide feed; the per-unit Messages tab shows threads with reply-in-thread, compose with priority, and Relay output.
 - **Implicit threading.** When a unit messages the unit that most recently wrote to it (within an hour) and omits `replyTo`, the broker threads it as a reply. Observed with haiku units: they answer promptly but forget `replyTo`. `replyTo` also accepts a thread id.
 - **Chatter risk.** Two or three units can keep acknowledging each other indefinitely because every inbox delivery is a fresh turn. The inbox footer now says to reply only when the sender needs something and never to send acknowledgements. If this is not enough in practice, the next lever is a per-thread cap on consecutive unit-to-unit turns, surfaced to the operator as an alert.
+
+## M6
+
+- **Icons are generated at build by a dependency-free PNG encoder** (`packages/client/scripts/icons.mjs`, zlib + CRC): 192, 512 and a maskable 512, plus an SVG. No sharp/canvas native dependency.
+- **Service worker uses `injectManifest`** (`src/sw.ts`) rather than `generateSW`, because the push and notification-click handlers have to live in the worker. Workbox precaches the shell; navigations fall back to `index.html`; `/api` and `/ws` are never cached.
+- **Offline shell**: the latest snapshot is written to IndexedDB (idb-keyval, throttled to one write per 2 s). If no live snapshot arrives within 2.5 s of load, the cached one is applied with `connection: "offline"` and a `cachedAt`; the app adds a `readonly` class that disables every command control.
+- **Push coalescing** is per unit (or per kind for unit-less alerts) with a 60 s window; refreshed tiles (idle minutes ticking) do not re-push, except `waiting`, which is always news. 404/410 from the push service prune the subscription.
+- **Mobile camera nudge**: the sheet height (52 % / 78 %) is passed as `focusOffsetY` and the camera target is pushed toward the camera so the focused unit sits above the sheet.
+- **Push on a physical phone was not verified in this environment** (no Android device attached). The plumbing is covered by `push.test.ts` (sender, coalescing, pruning) and the SW handlers are exercised by Chromium only for registration; test the first push with `tailscale serve` as the README describes.

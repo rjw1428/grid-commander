@@ -10,6 +10,7 @@ import { DemoRuntime } from "./runtime/DemoRuntime.js";
 import { CommsBroker } from "./comms/CommsBroker.js";
 import { FLEET_TOOL_NAMES, fleetServerForUnit } from "./comms/fleetTools.js";
 import { hooksForUnit } from "./comms/hooks.js";
+import { PushService, type PushSender } from "./alerts/PushService.js";
 import { openDb, type Db } from "./store/db.js";
 import { createStores, type Stores } from "./store/stores.js";
 import { VERSION } from "./version.js";
@@ -32,6 +33,9 @@ export interface HubOptions {
   autoStartOnOrder?: boolean;
   pushEnabled?: boolean;
   nudgeIntervalMs?: number;
+  /** Web Push sender; when present, alerts of the configured kinds are pushed. */
+  pushSender?: PushSender;
+  pushCoalesceMs?: number;
 }
 
 export interface Hub {
@@ -43,6 +47,7 @@ export interface Hub {
   orders: OrderService;
   alerts: AlertEngine;
   comms: CommsBroker;
+  push?: PushService;
   settings(): Settings;
   patchSettings(p: Partial<Settings>): Settings;
   snapshot(): Snapshot;
@@ -100,6 +105,7 @@ export function createHub(opts: HubOptions): Hub {
   const alerts = new AlertEngine({ stores, bus, fleet, units, settings: () => settingsCache, log: opts.log, watchdogMs: opts.watchdogMs });
   const comms = new CommsBroker({ stores, fleet, units, orders, alerts, bus, settings: () => settingsCache, log: opts.log, nudgeIntervalMs: opts.nudgeIntervalMs });
   commsRef.current = comms;
+  const push = opts.pushSender ? new PushService({ alerts, store: stores.push, settings: () => settingsCache, send: opts.pushSender, log: opts.log, coalesceMs: opts.pushCoalesceMs }) : undefined;
   const startedAt = Date.now();
   const publishInfo = () => bus.publish({ type: "server.info", info: hub.snapshot().server });
   units.on("started", publishInfo);
@@ -114,8 +120,9 @@ export function createHub(opts: HubOptions): Hub {
     orders,
     alerts,
     comms,
+    push,
     startedAt,
-    pushEnabled: opts.pushEnabled ?? false,
+    pushEnabled: opts.pushEnabled ?? Boolean(opts.pushSender),
     settings: () => settingsCache,
     patchSettings(p) {
       settingsCache = stores.settings.set(p);
@@ -144,6 +151,7 @@ export function createHub(opts: HubOptions): Hub {
       for (const t of UNIT_TYPES) getUnitType(t.id); // validates unit-types.json at startup
       const { wasWorking } = fleet.load(cfg);
       alerts.start();
+      push?.start();
       for (const u of wasWorking) {
         alerts.raise({ kind: "info", unitId: u.id, title: u.name, body: "was mid-turn when the server stopped; resume with Start" });
       }
@@ -160,6 +168,7 @@ export function createHub(opts: HubOptions): Hub {
     },
     async shutdown() {
       alerts.stop();
+      push?.stop();
       await units.shutdown();
       fleet.flush();
       db.close();

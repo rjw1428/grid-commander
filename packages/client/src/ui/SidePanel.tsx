@@ -6,6 +6,7 @@ import { ProjectPanel } from "./panels/ProjectPanel.js";
 import { UnitPanel } from "./panels/UnitPanel.js";
 import { Messages } from "./panels/Messages.js";
 import { AllMessages } from "./panels/AllMessages.js";
+import { SettingsPanel } from "./panels/SettingsPanel.js";
 
 export function SidePanel({ className = "side-panel", messagesTab }: { className?: string; messagesTab?: (unitId: string) => React.ReactNode }) {
   const panel = useFleet((s) => s.panel);
@@ -41,19 +42,7 @@ export function SidePanel({ className = "side-panel", messagesTab }: { className
       {panel.kind === "project" && <ProjectPanel id={panel.id} onClose={close} />}
       {panel.kind === "recruit" && <RecruitDialog projectId={panel.projectId} onClose={closeOnly} />}
       {panel.kind === "messages" && <AllMessages onClose={closeOnly} />}
-      {panel.kind === "settings" && (
-        <>
-          <header>
-            <h2>Settings</h2>
-            <button type="button" className="xbtn" onClick={closeOnly} aria-label="close">
-              ×
-            </button>
-          </header>
-          <div className="body">
-            <div className="empty">Server settings arrive in M7.</div>
-          </div>
-        </>
-      )}
+      {panel.kind === "settings" && <SettingsPanel onClose={closeOnly} />}
     </aside>
   );
 }

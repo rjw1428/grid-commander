@@ -27,6 +27,30 @@ pnpm build
 FLEET_TOKEN=... FLEET_HOST=0.0.0.0 pnpm start   # serves client from packages/client/dist on :7777
 ```
 
+## Demo mode (no Claude needed)
+
+```bash
+FLEET_DEMO=1 FLEET_TOKEN=demo-token-12345678 pnpm start
+```
+
+Units run a scripted runtime: orders containing "permission", "question", "fail" or "long" exercise those paths. Useful for trying the UI and for the Playwright suite.
+
+## Phone, PWA and push
+
+The app installs as a PWA and runs on Android Chrome. Installability and Web Push need HTTPS:
+
+- **Tailscale (recommended):** on the server machine run `tailscale serve --bg 7777`, then open `https://<machine>.<tailnet>.ts.net/` on the phone. Tailscale provides the certificate.
+- **LAN with mkcert:** `mkcert -install && mkcert <lan-ip>`, then put a TLS proxy (Caddy: `caddy reverse-proxy --from <lan-ip>:8443 --to 127.0.0.1:7777`) in front and trust the mkcert root on the phone.
+
+Push notifications:
+
+```bash
+npx web-push generate-vapid-keys        # once
+export VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com
+```
+
+Then open Commands → Settings on the phone and tap "Enable push on this device". Pushes go out for `waiting`, `error` and `done` by default (configurable in Settings), coalesced to one per unit per minute, and deep-link to the unit. Push only arrives while Chrome is alive on Android; it is not a system service. If the server is unreachable the installed app opens with the last snapshot and a red "offline · cached" pill; commands are disabled until the socket is back.
+
 ## Environment
 
 | Var | Default | Purpose |
@@ -52,7 +76,7 @@ Paste the token once at the gate, or open `http://host:7777/?token=<FLEET_TOKEN>
 ## Scripts
 
 - `pnpm dev` / `pnpm build` / `pnpm test` / `pnpm lint`
-- `pnpm --filter @hexcommand/client test:e2e` runs the Playwright smoke test (needs `pnpm build` first and `pnpm --filter @hexcommand/client exec playwright install chromium-headless-shell` once).
+- `pnpm --filter @hexcommand/client test:e2e` runs the Playwright suite (desktop smoke, full command flow on the demo runtime, mobile layout). Needs `pnpm build` first and `pnpm --filter @hexcommand/client exec playwright install chromium-headless-shell` once.
 - `pnpm cli unit run --project <id> --type infantry "<prompt>"` runs one unit in the terminal (M1).
 - `FLEET_E2E=1 pnpm test` additionally runs the real-SDK integration tests (needs a Claude login).
 

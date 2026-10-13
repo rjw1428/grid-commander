@@ -15,7 +15,8 @@ export function Brand() {
 
 export function ConnectionPill() {
   const connection = useFleet((s) => s.connection);
-  const label = connection === "live" ? "live" : connection === "connecting" ? "connecting" : "offline";
+  const cachedAt = useFleet((s) => s.cachedAt);
+  const label = connection === "live" ? "live" : connection === "connecting" ? "connecting" : cachedAt ? "offline · cached" : "offline";
   return (
     <span className={`pill ${connection}`} role="status" aria-live="polite">
       <span className="dot" />
@@ -24,9 +25,26 @@ export function ConnectionPill() {
   );
 }
 
-export function Header({ onLegend, legendOpen }: { onLegend: () => void; legendOpen: boolean }) {
+export function Header({ onLegend, legendOpen, compact = false }: { onLegend: () => void; legendOpen: boolean; compact?: boolean }) {
   const counts = useFleet(useShallow(selectCounts));
   const server = useFleet((s) => s.server);
+  if (compact) {
+    return (
+      <header className="header compact">
+        <Brand />
+        <span className="counters">
+          <span className="counter">
+            <b>{counts.working}</b>wk
+          </span>
+          <span className={`counter${counts.waiting ? " hot" : ""}`}>
+            <b>{counts.waiting}</b>wait
+          </span>
+        </span>
+        <div className="spacer" />
+        <ConnectionPill />
+      </header>
+    );
+  }
   return (
     <header className="header">
       <Brand />

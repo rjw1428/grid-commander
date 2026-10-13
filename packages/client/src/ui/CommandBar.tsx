@@ -92,6 +92,9 @@ export function CommandBar() {
       <button type="button" className={`cmd${panel.kind === "messages" ? " active" : ""}`} onClick={() => useFleet.getState().setPanel({ kind: "messages" })} title="All fleet messages">
         Messages
       </button>
+      <button type="button" className={`cmd${panel.kind === "settings" ? " active" : ""}`} onClick={() => useFleet.getState().setPanel({ kind: "settings" })} title="Settings and notifications">
+        Settings
+      </button>
     </nav>
   );
 }

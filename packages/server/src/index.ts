@@ -4,6 +4,7 @@ import pino from "pino";
 import { loadEnv, loadFleetConfig } from "./config.js";
 import { buildApp } from "./app.js";
 import { createHub } from "./hub.js";
+import { createWebPushSender } from "./alerts/PushService.js";
 import { VERSION } from "./version.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -13,6 +14,10 @@ async function main() {
   const log = pino({ level: env.LOG_LEVEL, redact: ["*.token", "*.authorization"] });
   const fleet = loadFleetConfig(env.FLEET_CONFIG);
 
+  const pushSender =
+    env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
+      ? await createWebPushSender({ publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? "mailto:operator@hexcommand.local" })
+      : undefined;
   const hub = createHub({
     dbPath: env.FLEET_DB,
     configPath: env.FLEET_CONFIG,
@@ -23,7 +28,9 @@ async function main() {
     log,
     pushEnabled: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY),
     demo: env.FLEET_DEMO === "1",
+    pushSender,
   });
+  if (pushSender) log.info("web push enabled");
   if (env.FLEET_DEMO === "1") log.warn("FLEET_DEMO=1: units run a scripted demo runtime, not Claude");
   await hub.boot(fleet);
 
