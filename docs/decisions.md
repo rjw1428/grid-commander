@@ -82,3 +82,4 @@ Recorded as the build progresses. Newest at the bottom.
 ## Naming
 
 - The product is called **Grid Commander** everywhere (operator request, 2026-10-13). The spec documents originally said "Hex Command"; they, the package scope (`@gridcommander/*`), PWA manifest, storage keys and system prompt were all renamed in one pass.
+- **Relative `FLEET_CONFIG` / `FLEET_DB` / `FLEET_ROOT` resolve against `INIT_CWD`** (the directory `pnpm start` was invoked from), not `packages/server`, and a missing fleet file logs a warning instead of silently starting empty.

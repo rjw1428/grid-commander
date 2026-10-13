@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pino from "pino";
@@ -12,16 +13,22 @@ const here = dirname(fileURLToPath(import.meta.url));
 async function main() {
   const env = loadEnv();
   const log = pino({ level: env.LOG_LEVEL, redact: ["*.token", "*.authorization"] });
-  const fleet = loadFleetConfig(env.FLEET_CONFIG);
+  // pnpm runs the script with cwd = packages/server; resolve relative paths against the invoking directory.
+  const base = process.env.INIT_CWD ?? process.cwd();
+  const configPath = resolve(base, env.FLEET_CONFIG);
+  const dbPath = resolve(base, env.FLEET_DB);
+  const fleetRoot = env.FLEET_ROOT ? resolve(base, env.FLEET_ROOT) : base;
+  if (!existsSync(configPath)) log.warn({ configPath }, "fleet config not found; starting with an empty fleet");
+  const fleet = loadFleetConfig(configPath);
 
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
       ? await createWebPushSender({ publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? "mailto:operator@gridcommander.local" })
       : undefined;
   const hub = createHub({
-    dbPath: env.FLEET_DB,
-    configPath: env.FLEET_CONFIG,
-    fleetRoot: env.FLEET_ROOT ?? process.cwd(),
+    dbPath,
+    configPath,
+    fleetRoot,
     maxUnits: env.FLEET_MAX_UNITS,
     doneAutoAckMs: env.FLEET_DONE_AUTOACK_MS,
     idleAlertMs: env.FLEET_IDLE_ALERT_MS,
