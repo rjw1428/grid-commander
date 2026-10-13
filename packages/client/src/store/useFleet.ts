@@ -50,6 +50,9 @@ export interface FleetState {
   /** operator-local banner for mobile */
   banner: Alert | null;
   soundOn: boolean;
+  toasts: Toast[];
+  /** unit being moved in move mode (first selection when the mode was entered) */
+  moveUnitId: string | null;
 
   applySnapshot: (s: Snapshot) => void;
   applyEvent: (e: WsServerEvent) => void;
@@ -68,7 +71,18 @@ export interface FleetState {
   setMessages: (m: Message[]) => void;
   setBanner: (a: Alert | null) => void;
   setSound: (on: boolean) => void;
+  toast: (t: Omit<Toast, "id">) => void;
+  dismissToast: (id: number) => void;
+  enterMove: (unitId: string) => void;
+  exitMove: () => void;
 }
+
+export interface Toast {
+  id: number;
+  kind: "info" | "error" | "ok";
+  text: string;
+}
+let toastSeq = 0;
 
 const byId = <T extends { id: string }>(xs: T[]): Record<string, T> => Object.fromEntries(xs.map((x) => [x.id, x]));
 
@@ -92,6 +106,8 @@ export const useFleet = create<FleetState>((set, get) => ({
   focus: null,
   banner: null,
   soundOn: false,
+  toasts: [],
+  moveUnitId: null,
 
   applySnapshot: (s) =>
     set((st) => ({
@@ -214,6 +230,14 @@ export const useFleet = create<FleetState>((set, get) => ({
   setMessages: (messages) => set({ messages }),
   setBanner: (banner) => set({ banner }),
   setSound: (soundOn) => set({ soundOn }),
+  toast: (t) => {
+    const id = ++toastSeq;
+    set((st) => ({ toasts: [...st.toasts, { id, ...t }].slice(-4) }));
+    setTimeout(() => get().dismissToast(id), t.kind === "error" ? 6000 : 3500);
+  },
+  dismissToast: (id) => set((st) => ({ toasts: st.toasts.filter((t) => t.id !== id) })),
+  enterMove: (moveUnitId) => set({ mode: "move", moveUnitId }),
+  exitMove: () => set({ mode: "idle", moveUnitId: null }),
 }));
 
 // ----------------------------------------------------------------------------- selectors

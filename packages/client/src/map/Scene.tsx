@@ -14,7 +14,8 @@ import { useReducedMotion } from "../util/useIsMobile.js";
 export interface SceneProps {
   mobile: boolean;
   focusOffsetY?: number;
-  onTileClick?: (tile: TileRef, e: ThreeEvent<MouseEvent>) => void;
+  /** Return true to consume the click (e.g. move mode); false falls through to territory selection. */
+  onTileClick?: (tile: TileRef, e: ThreeEvent<MouseEvent>) => boolean;
 }
 
 export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
@@ -52,7 +53,7 @@ export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
 
   const handleTileClick = useCallback(
     (tile: TileRef, e: ThreeEvent<MouseEvent>) => {
-      if (onTileClick) return onTileClick(tile, e);
+      if (onTileClick?.(tile, e)) return;
       // territory click → select the project's units as a group
       const ids = units.filter((u) => u.projectId === tile.project.id).map((u) => u.id);
       if (ids.length) select(ids);

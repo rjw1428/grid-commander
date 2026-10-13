@@ -22,7 +22,9 @@ async function main() {
     idleAlertMs: env.FLEET_IDLE_ALERT_MS,
     log,
     pushEnabled: Boolean(env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY),
+    demo: env.FLEET_DEMO === "1",
   });
+  if (env.FLEET_DEMO === "1") log.warn("FLEET_DEMO=1: units run a scripted demo runtime, not Claude");
   await hub.boot(fleet);
 
   const clientDist = env.CLIENT_DIST ? resolve(env.CLIENT_DIST) : resolve(here, "../../client/dist");

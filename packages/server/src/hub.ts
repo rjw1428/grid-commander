@@ -6,6 +6,7 @@ import { OrderService } from "./fleet/OrderService.js";
 import { UnitService, type RuntimeFactory } from "./fleet/UnitService.js";
 import { buildUnitSystemPrompt } from "./runtime/systemPrompt.js";
 import { UnitRuntime, realSdk, type RuntimeLogger, type SdkFacade } from "./runtime/UnitRuntime.js";
+import { DemoRuntime } from "./runtime/DemoRuntime.js";
 import { openDb, type Db } from "./store/db.js";
 import { createStores, type Stores } from "./store/stores.js";
 import { VERSION } from "./version.js";
@@ -20,6 +21,8 @@ export interface HubOptions {
   log: RuntimeLogger;
   /** Override the runtime factory (tests inject the fake SDK). */
   factory?: RuntimeFactory;
+  /** Scripted demo runtime instead of the SDK. */
+  demo?: boolean;
   sdk?: SdkFacade;
   transcriptBatchMs?: number;
   watchdogMs?: number;
@@ -63,12 +66,16 @@ export function defaultRuntimeFactory(sdk: SdkFacade, log: RuntimeLogger): Runti
     );
 }
 
+export function demoRuntimeFactory(speed = 1): RuntimeFactory {
+  return ({ unit }) => new DemoRuntime({ unitId: unit.id, name: unit.name, model: unit.model, permissionMode: unit.permissionMode, sessionId: unit.sessionId, speed });
+}
+
 export function createHub(opts: HubOptions): Hub {
   const db = openDb(opts.dbPath);
   const stores = createStores(db);
   const bus = new Bus((err, ev) => opts.log.error({ err, ev }, "bus listener threw"));
   const fleet = new FleetService({ stores, bus, configPath: opts.configPath, log: opts.log, fleetRoot: opts.fleetRoot });
-  const factory = opts.factory ?? defaultRuntimeFactory(opts.sdk ?? realSdk, opts.log);
+  const factory = opts.factory ?? (opts.demo ? demoRuntimeFactory() : defaultRuntimeFactory(opts.sdk ?? realSdk, opts.log));
   const units = new UnitService({
     fleet,
     stores,

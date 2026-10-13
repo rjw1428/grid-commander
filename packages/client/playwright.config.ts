@@ -9,16 +9,18 @@ export default defineConfig({
   retries: 0,
   use: { baseURL: `http://127.0.0.1:${PORT}`, viewport: { width: 1400, height: 900 } },
   webServer: {
-    command: `node ../server/dist/index.js`,
+    // fresh copy of the example fleet per run: the server writes back to FLEET_CONFIG
+    command: `mkdir -p test-results && cp ../../fleet.example.json test-results/fleet.json && node ../server/dist/index.js`,
     url: `http://127.0.0.1:${PORT}/api/health`,
     reuseExistingServer: false,
     env: {
       FLEET_TOKEN: TOKEN,
       FLEET_PORT: String(PORT),
-      FLEET_CONFIG: "../../fleet.example.json",
+      FLEET_CONFIG: "./test-results/fleet.json",
       FLEET_DB: ":memory:",
       LOG_LEVEL: "warn",
       CLIENT_DIST: "./dist",
+      FLEET_DEMO: "1",
     },
     timeout: 30_000,
   },

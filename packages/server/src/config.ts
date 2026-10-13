@@ -19,6 +19,8 @@ const EnvSchema = z.object({
   VAPID_SUBJECT: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   FLEET_E2E: z.string().optional(),
+  /** 1 = scripted demo runtime instead of the Agent SDK (no Claude needed). */
+  FLEET_DEMO: z.string().optional(),
   LOG_LEVEL: z.string().default("info"),
   CLIENT_DIST: z.string().optional(),
 });

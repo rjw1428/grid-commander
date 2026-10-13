@@ -40,3 +40,14 @@ Recorded as the build progresses. Newest at the bottom.
 - **Static client serving uses wildcard routing** (`@fastify/static` default) with an SPA fallback for extension-less GETs, so a rebuilt client with new asset hashes is served without restarting the server.
 - **Token entry**: `?token=` on the URL is moved into localStorage and stripped from the address bar; otherwise a gate form asks for it. A 401 on reconnect clears it and re-shows the gate.
 - **Playwright smoke test runs against the real server** (`packages/server/dist`) with `fleet.example.json` and an in-memory DB: all units stay offline, so no Claude login is needed. Headless Chromium renders the scene through SwiftShader; `pnpm --filter @hexcommand/client test:e2e`.
+
+## M4
+
+- **`FLEET_DEMO=1` runs a scripted `DemoRuntime`** (`src/runtime/DemoRuntime.ts`) behind the same `Runtime` interface: order text containing "permission", "question", "fail" or "long" steers the script. It exists so the UI can be driven end to end (Playwright `command.spec.ts`) and demoed without a Claude login or token spend. The server logs a warning at boot when it is on.
+- **Opening a `done` unit acknowledges it** (spec: "operator acknowledges (opens the unit or clicks Ack)"). The Ack button remains for `error`.
+- **Transcript is windowed, not virtualised.** The store keeps a 500-entry ring; the panel renders the newest 120 and "Load earlier" widens the window before fetching older rows with `?before=`. With the ring capped at 500 this keeps the DOM small without a variable-height virtual list.
+- **Halt all / Compact idle are client-side fan-outs** over the per-unit endpoints; no new server routes were needed.
+- **Next orders** cycles through units in `waiting → error → done` order (oldest first within a rank) and wraps; `N` and Space trigger it. Esc interrupts the selected working unit, cancels move mode, or clears the selection, in that order.
+- **Move mode** is store state (`mode: "move"`, `moveUnitId`): a tile click PATCHes `hex` (and `projectId` when the tile belongs to another territory); occupancy is checked client-side first and again by the server (409).
+- **Sounds** use WebAudio triangle beeps (660 Hz waiting, 220 Hz error, 880 Hz done, 740 Hz message) and are gated behind the Sound toggle because an AudioContext needs a gesture.
+- **Playwright runs the server on a temp copy of `fleet.example.json`** because the server writes back to `FLEET_CONFIG`; an earlier run had appended a recruited unit to the committed example.
