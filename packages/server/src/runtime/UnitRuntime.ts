@@ -615,8 +615,8 @@ export class UnitRuntime implements Runtime {
       const question: PendingQuestion = { toolUseId: nanoid(10), questions, at };
       return new Promise<PermissionResult>((resolve) => {
         this.#pendingQuestion = { question, rawInput: input, resolve };
-        this.#setStatus({ type: "wait" });
         this.#events.emit("question", question);
+        this.#setStatus({ type: "wait" });
         signal.addEventListener(
           "abort",
           () => {
@@ -641,8 +641,8 @@ export class UnitRuntime implements Runtime {
     };
     return new Promise<PermissionResult>((resolve) => {
       this.#pendingPermission = { request, rawInput: input, suggestions, resolve };
-      this.#setStatus({ type: "wait" });
       this.#events.emit("permission", request);
+      this.#setStatus({ type: "wait" });
       signal.addEventListener(
         "abort",
         () => {

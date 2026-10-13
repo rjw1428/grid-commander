@@ -19,3 +19,14 @@ Recorded as the build progresses. Newest at the bottom.
 - **Type-only SDK imports** live in `src/runtime/sdkTypes.ts` so the fake SDK and tests share shapes; types are erased so the single-runtime-import rule in CLAUDE.md still holds for runtime code.
 - **AskUserQuestion is answered through `canUseTool`:** the runtime returns `{ behavior: "allow", updatedInput: { ...input, answers } }`, which is how the SDK expects hosts to answer. The spec's "assistant calls AskUserQuestion → waiting" is satisfied because the permission callback fires at that moment.
 - **Interrupt during a permission wait** uses the SDK's `{ behavior: "deny", interrupt: true }` escape hatch and then `interrupt()`; the turn resolves as interrupted.
+
+## M2
+
+- **Boot merge rule.** For entities present in both `fleet.json` and the DB, `fleet.json` wins for structure (name, type, project, hex, task, model, permission mode, team) and the DB wins for `sessionId`, `statusSince`, `lastResult`, `missionDone`, `createdAt`. Entities only in the DB are kept (deleting from `fleet.json` by hand does not delete data; delete from the UI or API instead). All units boot `offline`; units that were `working`/`waiting` at shutdown get an `info` alert.
+- **Orders to an offline unit auto-start it.** The spec is silent; an operator sending an order plainly wants the unit to run. The order is queued, `start()` is kicked off, and the queue drains when the runtime reports idle. Disable with `autoStartOnOrder: false` on the hub.
+- **"Interrupt & send" is implemented as front-of-queue + interrupt.** The order is inserted at the head of the FIFO and `interrupt()` is called; the interrupted `result` triggers the normal drain, so the urgent order is the next turn, ahead of anything already queued.
+- **Transcript tool results update in place.** `unit.transcriptUpdate { unitId, toolUseId, ok, durationMs }` was added to the WS union (the spec only listed appends) so the client can flip a tool line to ok/failed without a duplicate entry.
+- **Alerts for `done`/`error` derive from `turnFinished`**, not the status transition, so the alert body carries the result text. Interrupted turns raise no `done` alert.
+- **Error handler ordering.** Fastify child plugins inherit the error handler that exists at registration time, so `setErrorHandler` runs before `/api` is registered; otherwise `ApiError`s fall back to Fastify's default envelope.
+- **PermissionBridge is folded into UnitService** (`answerPermission`/`answerQuestion` delegate to the runtime). A separate class added nothing while there is one runtime per unit.
+- **Settings live in the `settings` table** and are exposed in the snapshot (`comms.crossProject`, `push.kinds`, `alerts.idleMs`, `alerts.doneAutoAckMs`); `FLEET_IDLE_ALERT_MS` seeds the idle threshold until the operator changes it.

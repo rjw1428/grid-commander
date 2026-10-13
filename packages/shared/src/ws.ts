@@ -23,6 +23,13 @@ export const WsServerEventSchema = z.discriminatedUnion("type", [
     entries: z.array(TranscriptEntrySchema),
   }),
   z.object({
+    type: z.literal("unit.transcriptUpdate"),
+    unitId: z.string(),
+    toolUseId: z.string(),
+    ok: z.boolean().optional(),
+    durationMs: z.number().optional(),
+  }),
+  z.object({
     type: z.literal("unit.permission"),
     unitId: z.string(),
     request: PermissionRequestSchema.nullable(),
