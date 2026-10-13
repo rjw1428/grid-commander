@@ -1,6 +1,7 @@
 {
   "name": "hexcommand",
   "private": true,
+  "type": "module",
   "version": "0.1.0",
   "description": "Browser UI for orchestrating many Claude Code sessions as military units on a hex map.",
   "packageManager": "pnpm@10.34.7",
