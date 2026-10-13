@@ -1,0 +1,25 @@
+{
+  "name": "hexcommand",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Browser UI for orchestrating many Claude Code sessions as military units on a hex map.",
+  "packageManager": "pnpm@10.34.7",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "pnpm --filter @hexcommand/shared build && pnpm -r --parallel dev",
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "eslint packages/*/src --ext .ts,.tsx",
+    "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
+    "cli": "pnpm --filter @hexcommand/server cli",
+    "start": "pnpm --filter @hexcommand/server start"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vitest": "5.0.4"
+  }
+}

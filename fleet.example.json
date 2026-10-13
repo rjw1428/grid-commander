@@ -1,0 +1,55 @@
+{
+  "projects": [
+    {
+      "id": "hq",
+      "name": "Headquarters",
+      "cwd": "",
+      "tint": "#3a2f1e",
+      "flag": "#e9c46a",
+      "cells": [[-3, 0], [-2, 0], [-3, 1]]
+    },
+    {
+      "id": "xre",
+      "name": "XRE Platform",
+      "cwd": "/home/ryan/src/xre",
+      "tint": "#2d4a63",
+      "flag": "#6fb3f0",
+      "cells": [[0, 0], [1, 0], [2, 0], [0, 1], [1, 1], [2, 1], [1, 2]]
+    },
+    {
+      "id": "api",
+      "name": "Billing API",
+      "cwd": "/home/ryan/src/billing-api",
+      "tint": "#2f4a36",
+      "flag": "#7fd68a",
+      "cells": [[4, -1], [5, -1], [4, 0], [5, 0], [6, 0], [5, 1]]
+    },
+    {
+      "id": "web",
+      "name": "Storefront",
+      "cwd": "/home/ryan/src/storefront",
+      "tint": "#4a2f4d",
+      "flag": "#d78ae0",
+      "cells": [[0, 3], [1, 3], [2, 3], [0, 4], [1, 4]]
+    }
+  ],
+  "teams": [
+    { "id": "t1", "name": "XRE Cache Squad", "color": "#e07a3a", "memberIds": ["xre-plan", "xre-cache", "xre-review"] }
+  ],
+  "units": [
+    { "id": "general", "name": "general", "type": "general", "projectId": "hq", "hex": [-3, 0], "task": "Coordinate the fleet" },
+    { "id": "merge-major", "name": "merge-major", "type": "major", "projectId": "hq", "hex": [-2, 0], "task": "Broker merges" },
+    { "id": "xre-plan", "name": "xre-plan", "type": "engineer", "projectId": "xre", "hex": [0, 0], "task": "Design cache invalidation" },
+    { "id": "xre-cache", "name": "xre-cache", "type": "infantry", "projectId": "xre", "hex": [1, 0], "task": "Implement LRU eviction" },
+    { "id": "xre-scout", "name": "xre-scout", "type": "sniper", "projectId": "xre", "hex": [2, 0], "task": "Find flaky tests" },
+    { "id": "xre-review", "name": "xre-review", "type": "captain", "projectId": "xre", "hex": [0, 1], "task": "Review PR #418" },
+    { "id": "xre-perf", "name": "xre-perf", "type": "infantry", "projectId": "xre", "hex": [1, 1], "task": "Profile startup" },
+    { "id": "api-arch", "name": "api-arch", "type": "engineer", "projectId": "api", "hex": [4, -1], "task": "Design webhook retries" },
+    { "id": "api-build", "name": "api-build", "type": "infantry", "projectId": "api", "hex": [5, -1], "task": "Implement idempotency keys" },
+    { "id": "api-build2", "name": "api-build2", "type": "infantry", "projectId": "api", "hex": [4, 0], "task": "Migrate invoices table" },
+    { "id": "api-review", "name": "api-review", "type": "captain", "projectId": "api", "hex": [5, 0], "task": "Review billing PRs" },
+    { "id": "web-ui", "name": "web-ui", "type": "infantry", "projectId": "web", "hex": [0, 3], "task": "Checkout redesign" },
+    { "id": "web-scout", "name": "web-scout", "type": "sniper", "projectId": "web", "hex": [1, 3], "task": "Audit bundle size" },
+    { "id": "web-review", "name": "web-review", "type": "captain", "projectId": "web", "hex": [0, 4], "task": "Review storefront PRs" }
+  ]
+}

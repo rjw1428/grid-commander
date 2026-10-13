@@ -1,0 +1,13 @@
+node_modules/
+dist/
+data/
+*.log
+.DS_Store
+fleet.json
+.env
+.env.*
+!.env.example
+coverage/
+playwright-report/
+test-results/
+packages/client/dev-dist/

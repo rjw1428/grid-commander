@@ -1,0 +1,58 @@
+# Hex Command
+
+Browser UI for running many Claude Code sessions in parallel across several projects, presented as a Civilization-style hex map. Each session is a military unit on a hex inside a project's territory. The operator commands the fleet from a desktop browser or an Android phone.
+
+Spec: `docs/` (start with `docs/00-overview.md`; build plan in `docs/06-milestones.md`; deviations in `docs/decisions.md`).
+
+## Requirements
+
+- Node 20+ and pnpm 10 (`npm i -g pnpm@10`).
+- A Claude login on the machine (`claude` CLI logged in) or `ANTHROPIC_API_KEY`.
+
+## Run
+
+```bash
+pnpm install
+cp fleet.example.json fleet.json        # edit project cwd paths to real repos
+export FLEET_TOKEN=$(openssl rand -hex 24)
+pnpm dev                                # server on :7777 (tsx watch) + Vite on :5173
+```
+
+Open http://localhost:5173 and paste the token when prompted.
+
+Production-style single process:
+
+```bash
+pnpm build
+FLEET_TOKEN=... FLEET_HOST=0.0.0.0 pnpm start   # serves client from packages/client/dist on :7777
+```
+
+## Environment
+
+| Var | Default | Purpose |
+|---|---|---|
+| `FLEET_TOKEN` | required | bearer token for REST and WS (`?token=` on WS upgrade) |
+| `FLEET_HOST` | `127.0.0.1` | bind address; `0.0.0.0` for LAN/Tailscale |
+| `FLEET_PORT` | `7777` | |
+| `FLEET_CONFIG` | `./fleet.json` | fleet definition; written back when you edit from the UI |
+| `FLEET_DB` | `./data/fleet.db` | SQLite file |
+| `FLEET_IDLE_ALERT_MS` | `120000` | idle watchdog threshold |
+| `FLEET_DONE_AUTOACK_MS` | `600000` | auto-acknowledge `done` after this long |
+| `FLEET_MAX_UNITS` | `24` | cap on concurrently running sessions |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | optional | Web Push |
+| `ANTHROPIC_API_KEY` | optional | passed through to the SDK |
+
+## Scripts
+
+- `pnpm dev` / `pnpm build` / `pnpm test` / `pnpm lint`
+- `pnpm cli unit run --project <id> --type infantry "<prompt>"` runs one unit in the terminal (M1).
+- `FLEET_E2E=1 pnpm test` additionally runs the real-SDK integration tests (needs a Claude login).
+
+## Layout
+
+```
+packages/shared   types + zod schemas + unit-types.json (everything that crosses the wire)
+packages/server   Fastify + WebSocket + Agent SDK runtime + SQLite
+packages/client   Vite + React + react-three-fiber + PWA
+docs/             spec and decisions
+```
