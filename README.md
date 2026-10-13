@@ -25,12 +25,14 @@ Production-style single process:
 ```bash
 pnpm build
 FLEET_TOKEN=... FLEET_HOST=0.0.0.0 pnpm start   # serves client from packages/client/dist on :7777
+pnpm stop                                       # kills whatever listens on FLEET_PORT (default 7777)
 ```
 
 ## Demo mode (no Claude needed)
 
 ```bash
-FLEET_DEMO=1 FLEET_TOKEN=demo-token-12345678 pnpm start
+pnpm start:demo        # FLEET_DEMO=1 with token demo-token-12345678 unless FLEET_TOKEN is set
+pnpm stop
 ```
 
 Units run a scripted runtime: orders containing "permission", "question", "fail" or "long" exercise those paths. Useful for trying the UI and for the Playwright suite.

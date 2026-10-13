@@ -5,7 +5,9 @@
   "version": "0.1.0",
   "description": "Browser UI for orchestrating many Claude Code sessions as military units on a hex map.",
   "packageManager": "pnpm@10.34.7",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "pnpm --filter @gridcommander/shared build && pnpm -r --parallel dev",
     "build": "pnpm -r build",
@@ -13,7 +15,9 @@
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
     "cli": "pnpm --filter @gridcommander/server cli",
-    "start": "pnpm --filter @gridcommander/server start"
+    "start": "pnpm --filter @gridcommander/server start",
+    "stop": "node scripts/stop.mjs",
+    "start:demo": "FLEET_DEMO=1 FLEET_TOKEN=${FLEET_TOKEN:-demo-token-12345678} pnpm start"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
