@@ -94,7 +94,7 @@
     {
       "id": "web",
       "name": "Storefront",
-      "cwd": "/private/tmp/claude-501/-Volumes-Samsung990Evo-GitProjects-grid-commander/731a68bf-96c9-46a0-bb3b-9b4d3ad452eb/scratchpad/webcwd",
+      "cwd": "/home/ryan/src/web",
       "tint": "#4a2f4d",
       "flag": "#d78ae0",
       "cells": [
