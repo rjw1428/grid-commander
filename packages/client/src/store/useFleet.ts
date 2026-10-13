@@ -24,6 +24,7 @@ export type PanelView =
   | { kind: "team"; id: string }
   | { kind: "legend" }
   | { kind: "recruit"; projectId?: string }
+  | { kind: "messages" }
   | { kind: "settings" };
 
 const RING = 500;

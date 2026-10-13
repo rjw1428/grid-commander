@@ -18,7 +18,7 @@ import {
   type Unit,
 } from "@hexcommand/shared";
 import type { ZodType } from "zod";
-import { badRequest, conflict } from "../errors.js";
+import { badRequest } from "../errors.js";
 import type { Hub } from "../hub.js";
 
 function parse<T>(schema: ZodType<T>, data: unknown): T {
@@ -170,9 +170,9 @@ export function registerRest(api: FastifyInstance, deps: RestDeps): void {
 
   api.post("/messages", async (req, reply) => {
     const body = parse(OperatorMessageBodySchema, req.body);
-    if (!deps.comms) throw conflict("comms_unavailable", "agent comms are not enabled on this server");
+    const comms = deps.comms ?? hub.comms;
     reply.code(201);
-    return deps.comms.sendOperatorMessage(body);
+    return comms.sendOperatorMessage(body);
   });
 
   api.get("/messages", async (req) => {

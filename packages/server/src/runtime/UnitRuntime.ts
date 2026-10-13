@@ -64,6 +64,8 @@ export interface UnitRuntimeOptions {
   /** Built lazily so the SDK's createSdkMcpServer/tool are only reached through the facade. */
   mcpServers?: (sdk: SdkFacade) => Record<string, McpServerConfig>;
   hooks?: Partial<Record<HookEvent, HookCallbackMatcher[]>>;
+  /** Tools that never prompt (the fleet MCP tools). */
+  allowedTools?: string[];
   env?: Record<string, string | undefined>;
   settingSources?: ("user" | "project" | "local")[];
   log?: RuntimeLogger;
@@ -359,6 +361,7 @@ export class UnitRuntime implements Runtime {
       stderr: (data: string) => this.#log.debug({ unitId: this.unitId, stderr: data.trimEnd() }),
     };
     if (mcpServers) options.mcpServers = mcpServers;
+    if (this.#opts.allowedTools?.length) options.allowedTools = this.#opts.allowedTools;
     if (this.#sessionId) options.resume = this.#sessionId;
     if (this.#opts.env) options.env = { ...process.env, ...this.#opts.env };
     if (this.#permissionMode === "bypassPermissions") options.allowDangerouslySkipPermissions = true;

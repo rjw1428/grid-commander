@@ -201,12 +201,18 @@ describe("REST contract", () => {
     expect((await c.req("POST", "/broadcast", { to: { kind: "team", id: "nope" }, text: "x" })).status).toBe(404);
   });
 
-  it("messages endpoints exist (comms broker arrives in M5)", async () => {
+  it("operator messages: stored, listed per unit and per thread", async () => {
     const c = await setup();
     expect((await c.req("GET", "/messages")).json).toEqual({ messages: [] });
-    expect((await c.req("GET", "/units/xre-plan/messages")).json).toEqual({ messages: [] });
     const r = await c.req("POST", "/messages", { to: { kind: "unit", id: "xre-plan" }, body: "hi" });
-    expect(r.status).toBe(409);
+    expect(r.status).toBe(201);
+    expect(r.json.message).toMatchObject({ from: "operator", priority: "normal" });
+    expect(r.json.delivery).toBe("queued"); // offline unit holds it
+    const list = await c.req("GET", "/units/xre-plan/messages");
+    expect(list.json.messages).toHaveLength(1);
+    const thread = await c.req("GET", `/messages?threadId=${r.json.message.threadId}`);
+    expect(thread.json.messages).toHaveLength(1);
+    expect(c.hub.fleet.getUnit("xre-plan").unreadInbox).toBe(1);
   });
 
   it("projects and teams CRUD", async () => {

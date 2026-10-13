@@ -7,6 +7,9 @@ import { UnitService, type RuntimeFactory } from "./fleet/UnitService.js";
 import { buildUnitSystemPrompt } from "./runtime/systemPrompt.js";
 import { UnitRuntime, realSdk, type RuntimeLogger, type SdkFacade } from "./runtime/UnitRuntime.js";
 import { DemoRuntime } from "./runtime/DemoRuntime.js";
+import { CommsBroker } from "./comms/CommsBroker.js";
+import { FLEET_TOOL_NAMES, fleetServerForUnit } from "./comms/fleetTools.js";
+import { hooksForUnit } from "./comms/hooks.js";
 import { openDb, type Db } from "./store/db.js";
 import { createStores, type Stores } from "./store/stores.js";
 import { VERSION } from "./version.js";
@@ -28,6 +31,7 @@ export interface HubOptions {
   watchdogMs?: number;
   autoStartOnOrder?: boolean;
   pushEnabled?: boolean;
+  nudgeIntervalMs?: number;
 }
 
 export interface Hub {
@@ -38,6 +42,7 @@ export interface Hub {
   units: UnitService;
   orders: OrderService;
   alerts: AlertEngine;
+  comms: CommsBroker;
   settings(): Settings;
   patchSettings(p: Partial<Settings>): Settings;
   snapshot(): Snapshot;
@@ -50,7 +55,7 @@ export interface Hub {
 
 /** Production runtime factory: real SDK, preset system prompt + unit briefing. M5 adds MCP tools/hooks. */
 export function defaultRuntimeFactory(sdk: SdkFacade, log: RuntimeLogger): RuntimeFactory {
-  return ({ unit, type, project, cwd }) =>
+  return ({ unit, type, project, cwd, getUnit, comms }) =>
     new UnitRuntime(
       {
         unitId: unit.id,
@@ -59,6 +64,7 @@ export function defaultRuntimeFactory(sdk: SdkFacade, log: RuntimeLogger): Runti
         permissionMode: unit.permissionMode,
         sessionId: unit.sessionId,
         systemPromptAppend: buildUnitSystemPrompt(unit, type, project),
+        ...(comms ? { mcpServers: (s) => ({ fleet: fleetServerForUnit(s, unit.id, getUnit, comms) }), hooks: hooksForUnit(unit.id, comms), allowedTools: FLEET_TOOL_NAMES.map((n) => `mcp__fleet__${n}`) } : {}),
         log,
         ...(process.env.ANTHROPIC_API_KEY ? { env: { ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY } } : {}),
       },
@@ -76,6 +82,7 @@ export function createHub(opts: HubOptions): Hub {
   const bus = new Bus((err, ev) => opts.log.error({ err, ev }, "bus listener threw"));
   const fleet = new FleetService({ stores, bus, configPath: opts.configPath, log: opts.log, fleetRoot: opts.fleetRoot });
   const factory = opts.factory ?? (opts.demo ? demoRuntimeFactory() : defaultRuntimeFactory(opts.sdk ?? realSdk, opts.log));
+  const commsRef: { current?: CommsBroker } = {};
   const units = new UnitService({
     fleet,
     stores,
@@ -85,11 +92,14 @@ export function createHub(opts: HubOptions): Hub {
     doneAutoAckMs: opts.doneAutoAckMs,
     log: opts.log,
     transcriptBatchMs: opts.transcriptBatchMs,
+    getComms: () => commsRef.current,
   });
   const orders = new OrderService({ stores, fleet, units, bus, log: opts.log, autoStartOnOrder: opts.autoStartOnOrder });
   let settingsCache = stores.settings.all();
   if (opts.idleAlertMs && settingsCache["alerts.idleMs"] === 120_000) settingsCache = { ...settingsCache, "alerts.idleMs": opts.idleAlertMs };
   const alerts = new AlertEngine({ stores, bus, fleet, units, settings: () => settingsCache, log: opts.log, watchdogMs: opts.watchdogMs });
+  const comms = new CommsBroker({ stores, fleet, units, orders, alerts, bus, settings: () => settingsCache, log: opts.log, nudgeIntervalMs: opts.nudgeIntervalMs });
+  commsRef.current = comms;
   const startedAt = Date.now();
   const publishInfo = () => bus.publish({ type: "server.info", info: hub.snapshot().server });
   units.on("started", publishInfo);
@@ -103,6 +113,7 @@ export function createHub(opts: HubOptions): Hub {
     units,
     orders,
     alerts,
+    comms,
     startedAt,
     pushEnabled: opts.pushEnabled ?? false,
     settings: () => settingsCache,

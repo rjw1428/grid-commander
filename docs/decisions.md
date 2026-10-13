@@ -51,3 +51,14 @@ Recorded as the build progresses. Newest at the bottom.
 - **Move mode** is store state (`mode: "move"`, `moveUnitId`): a tile click PATCHes `hex` (and `projectId` when the tile belongs to another territory); occupancy is checked client-side first and again by the server (409).
 - **Sounds** use WebAudio triangle beeps (660 Hz waiting, 220 Hz error, 880 Hz done, 740 Hz message) and are gated behind the Sound toggle because an AudioContext needs a gesture.
 - **Playwright runs the server on a temp copy of `fleet.example.json`** because the server writes back to `FLEET_CONFIG`; an earlier run had appended a recruited unit to the committed example.
+
+## M5
+
+- **Fleet MCP tools are pre-allowed** via the SDK's `allowedTools` (`mcp__fleet__*`). Without this a unit in `default` permission mode blocks on an operator prompt the first time it calls `fleet_send`, which is exactly the hang the first real-SDK comms run hit. The operator still governs Bash/Edit/etc. through `canUseTool`.
+- **Urgent delivery preempts the order queue** through an `OrderService.setPreempt` hook: while a unit has an urgent message pending, the drain hands the turn boundary to the broker, which submits the inbox first; queued orders follow.
+- **Urgent while waiting on a permission**: the broker marks the unit urgent-pending; when the operator's answer flips `waiting → working`, the broker interrupts and the inbox turn is delivered next.
+- **`fleet_send` to a group** (team/project) silently drops recipients the policy denies and only errors when nobody remains; a direct unit send errors with the explanatory message and the `"general"` hint.
+- **Message arcs**: `message.new` events younger than 5 s draw a bezier arc from sender hex to each recipient (gold normal, red-orange urgent, grey operator). Operator messages start at the HQ territory, or off-map when no `hq` project exists.
+- **`Messages` command** opens a fleet-wide feed; the per-unit Messages tab shows threads with reply-in-thread, compose with priority, and Relay output.
+- **Implicit threading.** When a unit messages the unit that most recently wrote to it (within an hour) and omits `replyTo`, the broker threads it as a reply. Observed with haiku units: they answer promptly but forget `replyTo`. `replyTo` also accepts a thread id.
+- **Chatter risk.** Two or three units can keep acknowledging each other indefinitely because every inbox delivery is a fresh turn. The inbox footer now says to reply only when the sender needs something and never to send acknowledgements. If this is not enough in practice, the next lever is a per-thread cap on consecutive unit-to-unit turns, surfaced to the operator as an alert.

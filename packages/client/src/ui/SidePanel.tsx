@@ -4,6 +4,8 @@ import { RecruitDialog } from "./RecruitDialog.js";
 import { GroupPanel } from "./panels/GroupPanel.js";
 import { ProjectPanel } from "./panels/ProjectPanel.js";
 import { UnitPanel } from "./panels/UnitPanel.js";
+import { Messages } from "./panels/Messages.js";
+import { AllMessages } from "./panels/AllMessages.js";
 
 export function SidePanel({ className = "side-panel", messagesTab }: { className?: string; messagesTab?: (unitId: string) => React.ReactNode }) {
   const panel = useFleet((s) => s.panel);
@@ -31,13 +33,14 @@ export function SidePanel({ className = "side-panel", messagesTab }: { className
       )}
       {panel.kind === "unit" && (
         <UnitPanel id={panel.id} onClose={close}>
-          {messagesTab?.(panel.id)}
+          {messagesTab ? messagesTab(panel.id) : <Messages unitId={panel.id} />}
         </UnitPanel>
       )}
       {panel.kind === "group" && <GroupPanel ids={panel.ids} onClose={close} />}
       {panel.kind === "team" && <GroupPanel ids={teams[panel.id]?.memberIds ?? []} onClose={close} title={teams[panel.id]?.name} />}
       {panel.kind === "project" && <ProjectPanel id={panel.id} onClose={close} />}
       {panel.kind === "recruit" && <RecruitDialog projectId={panel.projectId} onClose={closeOnly} />}
+      {panel.kind === "messages" && <AllMessages onClose={closeOnly} />}
       {panel.kind === "settings" && (
         <>
           <header>

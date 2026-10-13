@@ -89,7 +89,7 @@ export function CommandBar() {
       <button type="button" className={`cmd${soundOn ? " active" : ""}`} onClick={run(c.toggleSound)} aria-pressed={soundOn} title="Beep on alerts">
         Sound {soundOn ? "on" : "off"}
       </button>
-      <button type="button" className="cmd" disabled title="Messages arrive in M5">
+      <button type="button" className={`cmd${panel.kind === "messages" ? " active" : ""}`} onClick={() => useFleet.getState().setPanel({ kind: "messages" })} title="All fleet messages">
         Messages
       </button>
     </nav>

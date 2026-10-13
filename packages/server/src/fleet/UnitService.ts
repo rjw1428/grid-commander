@@ -22,6 +22,9 @@ export interface RuntimeFactoryCtx {
   type: UnitTypeDef;
   project: Project;
   cwd: string;
+  /** Live view of the unit (name/task/team change over the session). */
+  getUnit: () => Unit;
+  comms?: import("../comms/CommsBroker.js").CommsBroker;
 }
 export type RuntimeFactory = (ctx: RuntimeFactoryCtx) => Runtime;
 
@@ -35,6 +38,8 @@ export interface UnitServiceDeps {
   log: RuntimeLogger;
   /** Transcript WS batching window; 0 publishes synchronously (tests). */
   transcriptBatchMs?: number;
+  /** Resolved lazily because the broker is constructed after the unit service. */
+  getComms?: () => import("../comms/CommsBroker.js").CommsBroker | undefined;
 }
 
 interface UnitServiceEvents {
@@ -75,7 +80,7 @@ export class UnitService extends Emitter<UnitServiceEvents> {
     if (this.runtimes.size >= maxUnits) throw conflict("max_units", `FLEET_MAX_UNITS (${maxUnits}) running units reached`);
     const type = getUnitType(unit.type);
     const project = fleet.getProject(unit.projectId);
-    const rt = factory({ unit, type, project, cwd: fleet.projectCwd(project) });
+    const rt = factory({ unit, type, project, cwd: fleet.projectCwd(project), getUnit: () => fleet.getUnit(id), comms: this.#deps.getComms?.() });
     this.runtimes.set(id, rt);
     this.#wire(id, rt);
     try {

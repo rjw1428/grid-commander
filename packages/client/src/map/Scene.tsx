@@ -8,6 +8,7 @@ import { HexTiles, type TileRef } from "./HexTiles.js";
 import { LabelProjector } from "./LabelProjector.js";
 import { Labels } from "./Labels.js";
 import { Sea } from "./Sea.js";
+import { Arcs } from "./Arcs.js";
 import { UnitMarker } from "./UnitMarker.js";
 import { useReducedMotion } from "../util/useIsMobile.js";
 
@@ -116,6 +117,7 @@ export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
               />
             );
           })}
+          <Arcs />
           <LabelProjector units={units} projects={projects} />
           <CameraRig initialTarget={initialTarget} focusOffsetY={focusOffsetY} />
         </Suspense>

@@ -6,6 +6,8 @@ import { buildApp } from "../src/app.js";
 import { createHub, type Hub, type HubOptions } from "../src/hub.js";
 import { UnitRuntime } from "../src/runtime/UnitRuntime.js";
 import { createFakeSdk, scripts, type FakeSdkOptions, type FakeTurnScript } from "./fakeSdk.js";
+import { fleetServerForUnit } from "../src/comms/fleetTools.js";
+import { hooksForUnit } from "../src/comms/hooks.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const TOKEN = "test-token-0123456789";
@@ -34,7 +36,8 @@ export function createTestHub(
     log: silentLog,
     transcriptBatchMs: 0,
     watchdogMs: 60 * 60 * 1000,
-    factory: ({ unit, cwd }) =>
+    nudgeIntervalMs: 0,
+    factory: ({ unit, cwd, getUnit, comms }) =>
       new UnitRuntime(
         {
           unitId: unit.id,
@@ -45,6 +48,7 @@ export function createTestHub(
           systemPromptAppend: "",
           startGraceMs: 10,
           interruptTimeoutMs: 1000,
+          ...(comms ? { mcpServers: (s) => ({ fleet: fleetServerForUnit(s, unit.id, getUnit, comms) }), hooks: hooksForUnit(unit.id, comms), allowedTools: ["mcp__fleet__fleet_send"] } : {}),
         },
         sdk,
       ),

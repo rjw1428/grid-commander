@@ -28,6 +28,12 @@ interface OrderEvents {
 export class OrderService extends Emitter<OrderEvents> {
   #deps: OrderServiceDeps;
   #draining = new Set<string>();
+  #preempt: ((unitId: string) => boolean) | null = null;
+
+  /** Called before draining; returning true means someone else (the comms broker) takes this turn. */
+  setPreempt(fn: (unitId: string) => boolean): void {
+    this.#preempt = fn;
+  }
 
   constructor(deps: OrderServiceDeps) {
     super((err, ev) => deps.log.error({ err, ev }, "OrderService listener threw"));
@@ -95,6 +101,7 @@ export class OrderService extends Emitter<OrderEvents> {
     if (this.#draining.has(unitId)) return;
     const { units, stores } = this.#deps;
     if (!units.canAcceptTurn(unitId)) return;
+    if (this.#preempt?.(unitId)) return;
     const next = stores.orders.pending(unitId)[0];
     if (!next) {
       this.emit("queueEmpty", unitId);
