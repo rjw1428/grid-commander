@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hexcommand/shared": "workspace:*",
@@ -29,6 +30,7 @@
     "typescript": "5.9.3",
     "vite": "8.3.4",
     "vite-plugin-pwa": "2.0.0",
-    "vitest": "5.0.4"
+    "vitest": "5.0.4",
+    "@playwright/test": "1.64.0"
   }
 }

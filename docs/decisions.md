@@ -30,3 +30,13 @@ Recorded as the build progresses. Newest at the bottom.
 - **Error handler ordering.** Fastify child plugins inherit the error handler that exists at registration time, so `setErrorHandler` runs before `/api` is registered; otherwise `ApiError`s fall back to Fastify's default envelope.
 - **PermissionBridge is folded into UnitService** (`answerPermission`/`answerQuestion` delegate to the runtime). A separate class added nothing while there is one runtime per unit.
 - **Settings live in the `settings` table** and are exposed in the snapshot (`comms.crossProject`, `push.kinds`, `alerts.idleMs`, `alerts.doneAutoAckMs`); `FLEET_IDLE_ALERT_MS` seeds the idle threshold until the operator changes it.
+
+## M3
+
+- **No prototype to port**, so the rigs are original: boxes and cylinders with `flatShading`, parts grouped as `legs/torso/armL/armR/head/props`, posed per frame by a pure `poseSoldier()` in `src/map/rigs/pose.ts` (unit-tested). Headgear, props and work loops follow the table in `docs/05-client.md`. Soldiers face +z (toward the default camera).
+- **Labels are DOM nodes projected per frame** through a module-level registry (`labelNodes.ts`): React owns the label content, a `useFrame` projector writes `transform`/`opacity` directly, so nothing re-renders at 60 fps. Project nameplates sit one row behind the territory's back row so they do not collide with unit labels.
+- **Camera is a custom orbit rig**, not drei's OrbitControls: Civ-style left-drag pan, right/middle/shift-drag rotate, wheel zoom, one-finger pan, pinch zoom, two-finger rotate, arrow keys. Distance 8–40, pitch 0.35–1.45. A drag swallows the trailing click so selection is not cleared.
+- **Zustand 5 selectors that build arrays/objects are wrapped in `useShallow`**; a fresh reference per call makes React 19 loop (error #185). The store itself keeps maps keyed by id so plain field selectors are stable.
+- **Static client serving uses wildcard routing** (`@fastify/static` default) with an SPA fallback for extension-less GETs, so a rebuilt client with new asset hashes is served without restarting the server.
+- **Token entry**: `?token=` on the URL is moved into localStorage and stripped from the address bar; otherwise a gate form asks for it. A 401 on reconnect clears it and re-shows the gate.
+- **Playwright smoke test runs against the real server** (`packages/server/dist`) with `fleet.example.json` and an in-memory DB: all units stay offline, so no Claude login is needed. Headless Chromium renders the scene through SwiftShader; `pnpm --filter @hexcommand/client test:e2e`.

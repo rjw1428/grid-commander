@@ -25,7 +25,7 @@ async function main() {
   });
   await hub.boot(fleet);
 
-  const clientDist = env.CLIENT_DIST ?? resolve(here, "../../client/dist");
+  const clientDist = env.CLIENT_DIST ? resolve(env.CLIENT_DIST) : resolve(here, "../../client/dist");
   const app = await buildApp({
     token: env.FLEET_TOKEN,
     logLevel: env.LOG_LEVEL,

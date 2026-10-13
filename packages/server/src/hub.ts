@@ -84,6 +84,9 @@ export function createHub(opts: HubOptions): Hub {
   if (opts.idleAlertMs && settingsCache["alerts.idleMs"] === 120_000) settingsCache = { ...settingsCache, "alerts.idleMs": opts.idleAlertMs };
   const alerts = new AlertEngine({ stores, bus, fleet, units, settings: () => settingsCache, log: opts.log, watchdogMs: opts.watchdogMs });
   const startedAt = Date.now();
+  const publishInfo = () => bus.publish({ type: "server.info", info: hub.snapshot().server });
+  units.on("started", publishInfo);
+  units.on("stopped", publishInfo);
 
   const hub: Hub = {
     db,

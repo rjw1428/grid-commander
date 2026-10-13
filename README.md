@@ -42,9 +42,17 @@ FLEET_TOKEN=... FLEET_HOST=0.0.0.0 pnpm start   # serves client from packages/cl
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | optional | Web Push |
 | `ANTHROPIC_API_KEY` | optional | passed through to the SDK |
 
+## Client
+
+Desktop: left-drag pans, right/middle or shift-drag rotates, wheel zooms, arrow keys pan, `[`/`]` rotate, `-`/`=` zoom. Click a unit or tray card to select it (shift-click for multi-select); click a territory to select its project; `L` toggles the legend; `Esc` clears.
+Mobile: one finger pans, pinch zooms, two-finger drag rotates.
+
+Paste the token once at the gate, or open `http://host:7777/?token=<FLEET_TOKEN>`; it is kept in that browser's localStorage.
+
 ## Scripts
 
 - `pnpm dev` / `pnpm build` / `pnpm test` / `pnpm lint`
+- `pnpm --filter @hexcommand/client test:e2e` runs the Playwright smoke test (needs `pnpm build` first and `pnpm --filter @hexcommand/client exec playwright install chromium-headless-shell` once).
 - `pnpm cli unit run --project <id> --type infantry "<prompt>"` runs one unit in the terminal (M1).
 - `FLEET_E2E=1 pnpm test` additionally runs the real-SDK integration tests (needs a Claude login).
 
