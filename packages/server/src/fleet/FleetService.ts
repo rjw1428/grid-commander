@@ -15,7 +15,7 @@ import {
   type Project,
   type Team,
   type Unit,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import { nanoid } from "nanoid";
 import type { Bus } from "../bus.js";
 import { badRequest, conflict, notFound } from "../errors.js";

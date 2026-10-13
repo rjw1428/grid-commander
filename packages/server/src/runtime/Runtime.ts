@@ -5,7 +5,7 @@ import type {
   PermissionRequest,
   TranscriptEntry,
   UnitStatus,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 
 export interface TurnResult {
   ok: boolean;

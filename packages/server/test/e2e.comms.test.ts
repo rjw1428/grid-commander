@@ -12,8 +12,8 @@ describe.skipIf(!E2E)("real SDK comms (FLEET_E2E=1)", () => {
   it(
     "engineer messages infantry via fleet_send; infantry replies in-thread; cross-project denied; general succeeds",
     async () => {
-      const dir = mkdtempSync(join(tmpdir(), "hexcommand-comms-"));
-      const cwd = mkdtempSync(join(tmpdir(), "hexcommand-comms-cwd-"));
+      const dir = mkdtempSync(join(tmpdir(), "gridcommander-comms-"));
+      const cwd = mkdtempSync(join(tmpdir(), "gridcommander-comms-cwd-"));
       const hub = createHub({ dbPath: join(dir, "fleet.db"), fleetRoot: cwd, maxUnits: 6, doneAutoAckMs: 0, log: silentLog, transcriptBatchMs: 0, watchdogMs: 3_600_000 });
       await hub.boot({ projects: [], teams: [], units: [] }, { autostart: false });
       hub.fleet.createProject({ id: "xre", name: "XRE", cwd, cells: [[0, 0], [1, 0], [2, 0]] });

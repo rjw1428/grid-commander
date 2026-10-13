@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { Snapshot, Unit } from "@hexcommand/shared";
-import { UNIT_TYPES, SettingsSchema } from "@hexcommand/shared";
+import type { Snapshot, Unit } from "@gridcommander/shared";
+import { UNIT_TYPES, SettingsSchema } from "@gridcommander/shared";
 import { useFleet } from "../src/store/useFleet.js";
 
 const unit = (id: string, extra: Partial<Unit> = {}): Unit => ({

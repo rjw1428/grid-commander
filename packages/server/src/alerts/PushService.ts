@@ -1,4 +1,4 @@
-import type { Alert, Settings } from "@hexcommand/shared";
+import type { Alert, Settings } from "@gridcommander/shared";
 import type { AlertEngine } from "./AlertEngine.js";
 import type { RuntimeLogger } from "../runtime/UnitRuntime.js";
 import type { PushStore, StoredPushSubscription } from "../store/stores.js";

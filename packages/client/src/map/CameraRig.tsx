@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { hexToWorld, type Hex } from "@hexcommand/shared";
+import { hexToWorld, type Hex } from "@gridcommander/shared";
 import { useFleet } from "../store/useFleet.js";
 
 export interface CameraState {

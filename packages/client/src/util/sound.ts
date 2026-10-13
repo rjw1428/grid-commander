@@ -1,4 +1,4 @@
-import type { AlertKind } from "@hexcommand/shared";
+import type { AlertKind } from "@gridcommander/shared";
 
 let ctx: AudioContext | null = null;
 

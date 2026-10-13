@@ -3,7 +3,7 @@
 ## Repository layout (pnpm workspace)
 
 ```
-hexcommand/
+gridcommander/
   package.json            # workspaces, root scripts: dev, build, test, lint
   pnpm-workspace.yaml
   tsconfig.base.json
@@ -18,7 +18,7 @@ hexcommand/
 ```
 
 - `shared` exports: domain types (`Unit`, `Project`, `Team`, `Message`, `Alert`, `Order`, `UnitStatus`, `UnitTypeDef`), the WebSocket event union, REST request/response schemas, and `unit-types.json` loaded as a typed constant.
-- Server and client import only from `@hexcommand/shared` for anything crossing the wire. Zod schemas validate every inbound REST body and every WS message on the client.
+- Server and client import only from `@gridcommander/shared` for anything crossing the wire. Zod schemas validate every inbound REST body and every WS message on the client.
 
 ## Processes
 

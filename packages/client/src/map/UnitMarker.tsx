@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
-import { hexToWorld, type Project, type Team, type Unit, type UnitTypeDef } from "@hexcommand/shared";
+import { hexToWorld, type Project, type Team, type Unit, type UnitTypeDef } from "@gridcommander/shared";
 import { Soldier } from "./rigs/Soldier.js";
 import { poseSoldier, STATUS_COLORS, type RigParts } from "./rigs/pose.js";
 

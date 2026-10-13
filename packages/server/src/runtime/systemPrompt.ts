@@ -1,4 +1,4 @@
-import type { Project, UnitTypeDef } from "@hexcommand/shared";
+import type { Project, UnitTypeDef } from "@gridcommander/shared";
 
 export interface PromptUnit {
   name: string;
@@ -8,7 +8,7 @@ export interface PromptUnit {
 /** Appended to the claude_code preset system prompt. See docs/03-server.md and docs/04-agent-comms.md. */
 export function buildUnitSystemPrompt(unit: PromptUnit, type: UnitTypeDef, project: Project): string {
   const lines = [
-    `# Hex Command unit briefing`,
+    `# Grid Commander unit briefing`,
     ``,
     `You are unit "${unit.name}", a ${type.name} (${type.rank}) on project "${project.name}".`,
     `Role: ${type.role}`,

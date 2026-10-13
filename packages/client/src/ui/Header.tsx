@@ -8,7 +8,7 @@ export function Brand() {
         <polygon points="16,2 28,9 28,23 16,30 4,23 4,9" fill="none" stroke="#d4a73a" strokeWidth="2" />
         <polygon points="16,9 18.4,14.2 24,14.8 19.8,18.6 21,24 16,21.2 11,24 12.2,18.6 8,14.8 13.6,14.2" fill="#f2d27a" />
       </svg>
-      Hex Command
+      Grid Commander
     </div>
   );
 }

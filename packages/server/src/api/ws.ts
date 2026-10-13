@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import websocket from "@fastify/websocket";
-import { WsClientEventSchema, type WsServerEvent } from "@hexcommand/shared";
+import { WsClientEventSchema, type WsServerEvent } from "@gridcommander/shared";
 import type { Hub } from "../hub.js";
 import { makeAuthHook } from "./auth.js";
 

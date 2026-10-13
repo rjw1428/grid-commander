@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { hexToWorld, type Message } from "@hexcommand/shared";
+import { hexToWorld, type Message } from "@gridcommander/shared";
 import { useFleet } from "../store/useFleet.js";
 
 interface Arc {

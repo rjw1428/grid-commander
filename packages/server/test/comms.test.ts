@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { Message } from "@hexcommand/shared";
+import type { Message } from "@gridcommander/shared";
 import { createTestApp, createTestHub, exampleFleet, until, type TestHub } from "./helpers.js";
 import { scripts, type FakeQueryHandle, type FakeTurnScript } from "./fakeSdk.js";
 

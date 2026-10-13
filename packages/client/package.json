@@ -1,5 +1,5 @@
 {
-  "name": "@hexcommand/client",
+  "name": "@gridcommander/client",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "icons": "node scripts/icons.mjs"
   },
   "dependencies": {
-    "@hexcommand/shared": "workspace:*",
+    "@gridcommander/shared": "workspace:*",
     "@react-three/drei": "10.7.9",
     "@react-three/fiber": "9.8.1",
     "idb-keyval": "6.3.0",

@@ -1,4 +1,4 @@
-import type { Order, OrderSource } from "@hexcommand/shared";
+import type { Order, OrderSource } from "@gridcommander/shared";
 import { nanoid } from "nanoid";
 import type { Bus } from "../bus.js";
 import { notFound } from "../errors.js";

@@ -29,7 +29,7 @@ importers:
 
   packages/client:
     dependencies:
-      '@hexcommand/shared':
+      '@gridcommander/shared':
         specifier: workspace:*
         version: link:../shared
       '@react-three/drei':
@@ -108,7 +108,7 @@ importers:
       '@fastify/websocket':
         specifier: 11.3.4
         version: 11.3.4
-      '@hexcommand/shared':
+      '@gridcommander/shared':
         specifier: workspace:*
         version: link:../shared
       better-sqlite3:

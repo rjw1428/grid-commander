@@ -13,7 +13,7 @@ export function TokenGate({ onDone, error }: { onDone: () => void; error?: strin
           onDone();
         }}
       >
-        <h1>Hex Command</h1>
+        <h1>Grid Commander</h1>
         <p>Enter the fleet token (FLEET_TOKEN on the server). It is kept in this browser only.</p>
         <input type="password" autoFocus value={value} onChange={(e) => setValue(e.target.value)} placeholder="fleet token" aria-label="fleet token" />
         {error && <div className="err">{error}</div>}

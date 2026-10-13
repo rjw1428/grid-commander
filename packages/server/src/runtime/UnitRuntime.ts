@@ -11,7 +11,7 @@ import type {
   PermissionRequest,
   TranscriptEntry,
   UnitStatus,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import { Emitter } from "./emitter.js";
 import type { InitInfo, PermissionAnswer, Runtime, RuntimeEvents, TurnResult } from "./Runtime.js";
 import { nextStatus, type StatusEvent } from "./statusMachine.js";

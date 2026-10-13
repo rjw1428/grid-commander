@@ -16,7 +16,7 @@ import {
   QuestionAnswerBodySchema,
   TranscriptQuerySchema,
   type Unit,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import type { ZodType } from "zod";
 import { badRequest } from "../errors.js";
 import type { Hub } from "../hub.js";
@@ -36,7 +36,7 @@ export interface RestDeps {
   hub: Hub;
   /** M5: operator messages + broadcast go through the comms broker when present. */
   comms?: {
-    sendOperatorMessage(body: import("@hexcommand/shared").OperatorMessageBody): Promise<unknown>;
+    sendOperatorMessage(body: import("@gridcommander/shared").OperatorMessageBody): Promise<unknown>;
   };
   push?: {
     vapidPublicKey?: string;
@@ -239,7 +239,7 @@ export function registerRest(api: FastifyInstance, deps: RestDeps): void {
   api.get("/unit-types", async () => hub.snapshot().unitTypes);
 }
 
-export function transcriptToMarkdown(name: string, entries: import("@hexcommand/shared").TranscriptEntry[]): string {
+export function transcriptToMarkdown(name: string, entries: import("@gridcommander/shared").TranscriptEntry[]): string {
   const ts = (at: number) => new Date(at).toISOString().replace("T", " ").slice(0, 19);
   const out: string[] = [`# ${name} — transcript`, ""];
   for (const e of entries) {

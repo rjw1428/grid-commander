@@ -1,4 +1,4 @@
-# Hex Command
+# Grid Commander
 
 Browser UI for running many Claude Code sessions in parallel across several projects, presented as a Civilization-style hex map. Each session is a military unit on a hex inside a project's territory. The operator commands the fleet from a desktop browser or an Android phone.
 
@@ -76,7 +76,7 @@ Paste the token once at the gate, or open `http://host:7777/?token=<FLEET_TOKEN>
 ## Scripts
 
 - `pnpm dev` / `pnpm build` / `pnpm test` / `pnpm lint`
-- `pnpm --filter @hexcommand/client test:e2e` runs the Playwright suite (desktop smoke, full command flow on the demo runtime, mobile layout). Needs `pnpm build` first and `pnpm --filter @hexcommand/client exec playwright install chromium-headless-shell` once.
+- `pnpm --filter @gridcommander/client test:e2e` runs the Playwright suite (desktop smoke, full command flow on the demo runtime, mobile layout). Needs `pnpm build` first and `pnpm --filter @gridcommander/client exec playwright install chromium-headless-shell` once.
 - `pnpm cli unit run --project <id> --type infantry "<prompt>"` runs one unit in the terminal (M1).
 - `FLEET_E2E=1 pnpm test` additionally runs the real-SDK integration tests (needs a Claude login).
 

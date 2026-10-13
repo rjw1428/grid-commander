@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getUnitType, type Unit } from "@hexcommand/shared";
+import { getUnitType, type Unit } from "@gridcommander/shared";
 import type { SdkFacade } from "../runtime/UnitRuntime.js";
 import type { McpServerConfig } from "../runtime/sdkTypes.js";
 import { CommsBroker, CommsDenied } from "./CommsBroker.js";

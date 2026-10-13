@@ -8,7 +8,7 @@ import {
   type Unit,
   type UnitStatus,
   type UnitTypeDef,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import type { Bus } from "../bus.js";
 import { badRequest, conflict } from "../errors.js";
 import { Emitter } from "../runtime/emitter.js";

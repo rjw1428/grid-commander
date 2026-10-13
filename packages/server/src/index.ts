@@ -16,7 +16,7 @@ async function main() {
 
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
-      ? await createWebPushSender({ publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? "mailto:operator@hexcommand.local" })
+      ? await createWebPushSender({ publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT ?? "mailto:operator@gridcommander.local" })
       : undefined;
   const hub = createHub({
     dbPath: env.FLEET_DB,
@@ -58,7 +58,7 @@ async function main() {
   await app.listen({ host: env.FLEET_HOST, port: env.FLEET_PORT });
   log.info(
     { version: VERSION, units: hub.fleet.units.size, running: hub.units.runningCount, client: clientDist },
-    `Hex Command listening on http://${env.FLEET_HOST}:${env.FLEET_PORT}`,
+    `Grid Commander listening on http://${env.FLEET_HOST}:${env.FLEET_PORT}`,
   );
   void join;
 }

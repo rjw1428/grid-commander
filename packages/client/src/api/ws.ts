@@ -1,4 +1,4 @@
-import { WsServerEventSchema } from "@hexcommand/shared";
+import { WsServerEventSchema } from "@gridcommander/shared";
 import { useFleet } from "../store/useFleet.js";
 import { getToken } from "./token.js";
 

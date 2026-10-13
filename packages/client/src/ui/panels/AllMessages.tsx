@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Message } from "@hexcommand/shared";
+import type { Message } from "@gridcommander/shared";
 import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { ago } from "../../util/format.js";

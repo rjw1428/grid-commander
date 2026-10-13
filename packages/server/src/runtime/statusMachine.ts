@@ -1,4 +1,4 @@
-import type { UnitStatus } from "@hexcommand/shared";
+import type { UnitStatus } from "@gridcommander/shared";
 
 /**
  * Events that drive a unit's status. Pure data; the runtime and services emit them.

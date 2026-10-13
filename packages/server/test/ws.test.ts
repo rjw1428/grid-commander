@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import WebSocket from "ws";
-import type { WsServerEvent } from "@hexcommand/shared";
-import { WsServerEventSchema } from "@hexcommand/shared";
+import type { WsServerEvent } from "@gridcommander/shared";
+import { WsServerEventSchema } from "@gridcommander/shared";
 import { createTestApp, createTestHub, exampleFleet, TOKEN, until } from "./helpers.js";
 import { scripts } from "./fakeSdk.js";
 

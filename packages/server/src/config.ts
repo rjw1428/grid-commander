@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { FleetConfigSchema, type FleetConfig } from "@hexcommand/shared";
+import { FleetConfigSchema, type FleetConfig } from "@gridcommander/shared";
 
 const EnvSchema = z.object({
   FLEET_TOKEN: z.string().min(8, "FLEET_TOKEN must be at least 8 characters"),

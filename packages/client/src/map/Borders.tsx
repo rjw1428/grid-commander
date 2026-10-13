@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import * as THREE from "three";
-import { hexToWorld, type Project } from "@hexcommand/shared";
+import { hexToWorld, type Project } from "@gridcommander/shared";
 
 const R = 0.985;
 const SQ3 = Math.sqrt(3);

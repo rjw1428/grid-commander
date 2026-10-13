@@ -1,6 +1,6 @@
-# Hex Command — Overview
+# Grid Commander — Overview
 
-Hex Command is a browser UI for running many Claude Code sessions in parallel across several projects, presented as a Civilization-style hex map. Each session is a military **unit** standing on a hex inside a project's **territory**. Units have a rank that encodes their role and model, an animated work loop, and the ability to message other units. The operator (Ryan) commands the fleet from a desktop browser or an Android phone.
+Grid Commander is a browser UI for running many Claude Code sessions in parallel across several projects, presented as a Civilization-style hex map. Each session is a military **unit** standing on a hex inside a project's **territory**. Units have a rank that encodes their role and model, an animated work loop, and the ability to message other units. The operator (Ryan) commands the fleet from a desktop browser or an Android phone.
 
 This folder is the build specification. It is written for a Claude Code agent to implement, milestone by milestone (see `06-milestones.md`). `prototype/index.html` is a working single-file prototype of the map, unit rigs, animations, command bar and notifications running on simulated data; port its visual behaviour rather than re-inventing it.
 

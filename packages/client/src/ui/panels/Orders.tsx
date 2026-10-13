@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Order, Unit } from "@hexcommand/shared";
+import type { Order, Unit } from "@gridcommander/shared";
 import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { reportError } from "../Toasts.js";

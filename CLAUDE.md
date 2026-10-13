@@ -1,4 +1,4 @@
-# Hex Command
+# Grid Commander
 
 Browser UI for orchestrating many Claude Code sessions as military units on a hex map. Spec lives in docs/ (read docs/00-overview.md first; docs/06-milestones.md is the plan). The prototype referenced by the spec (prototype/index.html) was not supplied; rigs and animations are built from the tables in docs/05-client.md.
 

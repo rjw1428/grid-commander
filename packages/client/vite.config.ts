@@ -12,8 +12,8 @@ export default defineConfig({
       filename: "sw.ts",
       injectRegister: null,
       manifest: {
-        name: "Hex Command",
-        short_name: "HexCmd",
+        name: "Grid Commander",
+        short_name: "GridCmd",
         description: "Command many Claude Code sessions as units on a hex map.",
         display: "standalone",
         orientation: "any",

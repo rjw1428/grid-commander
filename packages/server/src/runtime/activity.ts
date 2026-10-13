@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import type { TranscriptEntry } from "@hexcommand/shared";
+import type { TranscriptEntry } from "@gridcommander/shared";
 
 /** Minimal structural view of an Anthropic content block; avoids importing SDK types here. */
 export type ContentBlock =

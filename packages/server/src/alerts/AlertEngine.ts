@@ -1,4 +1,4 @@
-import type { Alert, AlertKind, Settings, Unit } from "@hexcommand/shared";
+import type { Alert, AlertKind, Settings, Unit } from "@gridcommander/shared";
 import { nanoid } from "nanoid";
 import type { Bus } from "../bus.js";
 import { notFound } from "../errors.js";

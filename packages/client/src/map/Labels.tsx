@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { Project, Unit } from "@hexcommand/shared";
+import type { Project, Unit } from "@gridcommander/shared";
 import { projectLabelNodes, unitLabelNodes } from "./labelNodes.js";
 import { minutesSince } from "../util/format.js";
 

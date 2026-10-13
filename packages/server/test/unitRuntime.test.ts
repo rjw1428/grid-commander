@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { UnitStatus, TranscriptEntry } from "@hexcommand/shared";
+import type { UnitStatus, TranscriptEntry } from "@gridcommander/shared";
 import { UnitRuntime } from "../src/runtime/UnitRuntime.js";
 import { createFakeSdk, scripts, type FakeTurnScript } from "./fakeSdk.js";
 import type { TurnResult } from "../src/runtime/Runtime.js";

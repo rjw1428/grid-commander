@@ -1,4 +1,4 @@
-import { getUnitType, UNIT_TYPES, type FleetConfig, type Settings, type Snapshot } from "@hexcommand/shared";
+import { getUnitType, UNIT_TYPES, type FleetConfig, type Settings, type Snapshot } from "@gridcommander/shared";
 import { AlertEngine } from "./alerts/AlertEngine.js";
 import { Bus } from "./bus.js";
 import { FleetService } from "./fleet/FleetService.js";

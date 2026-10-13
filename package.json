@@ -1,5 +1,5 @@
 {
-  "name": "hexcommand",
+  "name": "gridcommander",
   "private": true,
   "type": "module",
   "version": "0.1.0",
@@ -7,13 +7,13 @@
   "packageManager": "pnpm@10.34.7",
   "engines": { "node": ">=20" },
   "scripts": {
-    "dev": "pnpm --filter @hexcommand/shared build && pnpm -r --parallel dev",
+    "dev": "pnpm --filter @gridcommander/shared build && pnpm -r --parallel dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "lint": "eslint packages/*/src --ext .ts,.tsx",
     "format": "prettier --write \"packages/*/src/**/*.{ts,tsx}\"",
-    "cli": "pnpm --filter @hexcommand/server cli",
-    "start": "pnpm --filter @hexcommand/server start"
+    "cli": "pnpm --filter @gridcommander/server cli",
+    "start": "pnpm --filter @gridcommander/server start"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

@@ -1,12 +1,12 @@
 /**
  * Opt-in integration test against the real Agent SDK. Needs a Claude login or ANTHROPIC_API_KEY.
- *   FLEET_E2E=1 pnpm --filter @hexcommand/server test -- e2e
+ *   FLEET_E2E=1 pnpm --filter @gridcommander/server test -- e2e
  */
 import { describe, expect, it } from "vitest";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import type { UnitStatus } from "@hexcommand/shared";
+import type { UnitStatus } from "@gridcommander/shared";
 import { UnitRuntime, realSdk } from "../src/runtime/UnitRuntime.js";
 
 const E2E = process.env.FLEET_E2E === "1";
@@ -15,7 +15,7 @@ describe.skipIf(!E2E)("real SDK (FLEET_E2E=1)", () => {
   it(
     "haiku unit completes a trivial prompt: offline → idle → working → done",
     async () => {
-      const cwd = mkdtempSync(join(tmpdir(), "hexcommand-e2e-"));
+      const cwd = mkdtempSync(join(tmpdir(), "gridcommander-e2e-"));
       const rt = new UnitRuntime(
         {
           unitId: "e2e-1",

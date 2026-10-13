@@ -8,7 +8,7 @@
  *   otherwise             → thinks, edits a file, replies
  */
 import { nanoid } from "nanoid";
-import type { OrderSource, PendingQuestion, PermissionMode, PermissionRequest, UnitStatus } from "@hexcommand/shared";
+import type { OrderSource, PendingQuestion, PermissionMode, PermissionRequest, UnitStatus } from "@gridcommander/shared";
 import { Emitter } from "./emitter.js";
 import type { InitInfo, PermissionAnswer, Runtime, RuntimeEvents, TurnResult } from "./Runtime.js";
 import { nextStatus, type StatusEvent } from "./statusMachine.js";

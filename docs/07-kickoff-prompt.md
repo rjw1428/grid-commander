@@ -3,7 +3,7 @@
 ## Repo setup
 
 ```bash
-mkdir hexcommand && cd hexcommand && git init
+mkdir gridcommander && cd gridcommander && git init
 mkdir -p docs prototype
 cp /path/to/spec/*.md docs/
 cp /path/to/prototype/index.html prototype/index.html
@@ -13,7 +13,7 @@ claude
 ## CLAUDE.md (place at repo root before starting)
 
 ```markdown
-# Hex Command
+# Grid Commander
 
 Browser UI for orchestrating many Claude Code sessions as military units on a hex map. Spec lives in docs/ (read docs/00-overview.md first; docs/06-milestones.md is the plan). prototype/index.html is the visual reference for the map, soldier rigs and animations; port, don't reinvent.
 

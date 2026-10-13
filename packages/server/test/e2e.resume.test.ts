@@ -15,10 +15,10 @@ describe.skipIf(!E2E)("real SDK resume (FLEET_E2E=1)", () => {
   it(
     "unit resumes by sessionId after a server restart",
     async () => {
-      const dir = mkdtempSync(join(tmpdir(), "hexcommand-resume-"));
+      const dir = mkdtempSync(join(tmpdir(), "gridcommander-resume-"));
       const dbPath = join(dir, "fleet.db");
       const configPath = join(dir, "fleet.json");
-      const cwd = mkdtempSync(join(tmpdir(), "hexcommand-resume-cwd-"));
+      const cwd = mkdtempSync(join(tmpdir(), "gridcommander-resume-cwd-"));
       const mk = () =>
         createHub({ dbPath, configPath, fleetRoot: cwd, maxUnits: 4, doneAutoAckMs: 0, log: silentLog, transcriptBatchMs: 0, watchdogMs: 3_600_000 });
 

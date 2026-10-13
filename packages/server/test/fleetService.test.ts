@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { FleetConfigSchema } from "@hexcommand/shared";
+import { FleetConfigSchema } from "@gridcommander/shared";
 import { hexSpiral } from "../src/fleet/FleetService.js";
 import { createTestHub, exampleFleet, until } from "./helpers.js";
 
@@ -67,7 +67,7 @@ describe("FleetService", () => {
   });
 
   it("writes fleet.json back atomically and the result re-validates", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "hexcommand-fleet-"));
+    const dir = mkdtempSync(join(tmpdir(), "gridcommander-fleet-"));
     const path = join(dir, "fleet.json");
     const t = createTestHub({ configPath: path });
     await t.hub.boot(exampleFleet(), { autostart: false });

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { TranscriptEntry } from "@hexcommand/shared";
+import type { TranscriptEntry } from "@gridcommander/shared";
 import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { reportError } from "../Toasts.js";

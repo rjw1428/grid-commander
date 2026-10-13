@@ -1,6 +1,6 @@
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
-import { hexToWorld, type Project, type Unit } from "@hexcommand/shared";
+import { hexToWorld, type Project, type Unit } from "@gridcommander/shared";
 import { useFleet } from "../store/useFleet.js";
 import { Borders } from "./Borders.js";
 import { CameraRig } from "./CameraRig.js";

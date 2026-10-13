@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { FleetConfigSchema, type FleetConfig } from "@hexcommand/shared";
+import { FleetConfigSchema, type FleetConfig } from "@gridcommander/shared";
 import { buildApp } from "../src/app.js";
 import { createHub, type Hub, type HubOptions } from "../src/hub.js";
 import { UnitRuntime } from "../src/runtime/UnitRuntime.js";

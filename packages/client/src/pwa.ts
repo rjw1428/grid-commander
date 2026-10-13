@@ -1,9 +1,9 @@
 import { get, set } from "idb-keyval";
-import type { Snapshot } from "@hexcommand/shared";
-import { SnapshotSchema } from "@hexcommand/shared";
+import type { Snapshot } from "@gridcommander/shared";
+import { SnapshotSchema } from "@gridcommander/shared";
 import { useFleet } from "./store/useFleet.js";
 
-const SNAP_KEY = "hexcommand.snapshot";
+const SNAP_KEY = "gridcommander.snapshot";
 
 /** Registers the service worker (production builds only) and listens for notification deep links. */
 export async function registerPwa(): Promise<void> {

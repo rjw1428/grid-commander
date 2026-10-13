@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { canAcceptTurn, isBusy, nextStatus } from "../src/runtime/statusMachine.js";
-import type { UnitStatus } from "@hexcommand/shared";
+import type { UnitStatus } from "@gridcommander/shared";
 
 const ALL: UnitStatus[] = ["offline", "idle", "working", "waiting", "done", "error"];
 

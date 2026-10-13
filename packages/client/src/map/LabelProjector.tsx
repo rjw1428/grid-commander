@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { hexToWorld, type Project, type Unit } from "@hexcommand/shared";
+import { hexToWorld, type Project, type Unit } from "@gridcommander/shared";
 import { projectLabelNodes, unitLabelNodes } from "./labelNodes.js";
 
 const v = new THREE.Vector3();

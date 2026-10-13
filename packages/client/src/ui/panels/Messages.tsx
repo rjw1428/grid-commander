@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { Message, MessageTarget, Priority } from "@hexcommand/shared";
+import type { Message, MessageTarget, Priority } from "@gridcommander/shared";
 import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { ago } from "../../util/format.js";

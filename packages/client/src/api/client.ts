@@ -19,7 +19,7 @@ import type {
   Team,
   TranscriptEntry,
   Unit,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import { getToken } from "./token.js";
 
 export class ApiClientError extends Error {

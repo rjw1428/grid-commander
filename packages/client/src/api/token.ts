@@ -1,4 +1,4 @@
-const KEY = "hexcommand.token";
+const KEY = "gridcommander.token";
 
 export function getToken(): string | null {
   try {

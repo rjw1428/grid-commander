@@ -7,7 +7,7 @@ import {
   type Priority,
   type Settings,
   type Unit,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 import type { Bus } from "../bus.js";
 import { badRequest, notFound } from "../errors.js";
 import type { AlertEngine } from "../alerts/AlertEngine.js";

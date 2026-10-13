@@ -1,6 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { UnitTypeDef } from "@hexcommand/shared";
+import type { UnitTypeDef } from "@gridcommander/shared";
 import type { RigParts } from "./pose.js";
 
 // ---------------------------------------------------------------------------- shared geometries

@@ -11,7 +11,7 @@ import type {
   Unit,
   UnitTypeDef,
   WsServerEvent,
-} from "@hexcommand/shared";
+} from "@gridcommander/shared";
 
 export type Connection = "connecting" | "live" | "offline";
 export type Mode = "idle" | "move" | "multi";

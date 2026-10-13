@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
-import type { Alert } from "@hexcommand/shared";
+import type { Alert } from "@gridcommander/shared";
 import { api } from "../api/client.js";
 import { selectOpenAlerts, useFleet } from "../store/useFleet.js";
 import { ago } from "../util/format.js";

@@ -10,7 +10,7 @@ Recorded as the build progresses. Newest at the bottom.
 - **`unit-types.json` lives at `packages/shared/src/unit-types.json`** (spec says `packages/shared/unit-types.json`) so `tsc` copies it into `dist/` on build and the JSON import works identically in Node and Vite.
 - **Agent SDK pinned to 0.3.296**, API names verified against the installed `sdk.d.ts`: `query({ prompt: AsyncIterable<SDKUserMessage>, options })` → `Query` with `interrupt()`, `setModel()`, `setPermissionMode()`, `close()`, `getContextUsage()`, `mcpServerStatus()`; `canUseTool(toolName, input, { signal, suggestions })` → `{ behavior: "allow" | "deny", ... }`; `createSdkMcpServer({ name, tools })` + `tool(name, description, zodShape, handler)`; hooks as `Partial<Record<HookEvent, HookCallbackMatcher[]>>` with `PostToolUse` → `hookSpecificOutput.additionalContext` and `Stop` → `last_assistant_message`. Result subtypes: `success`, `error_during_execution`, `error_max_turns`, `error_max_budget_usd`, `error_max_structured_output_retries`.
 - **PermissionMode** mirrors the SDK's current union: `default | acceptEdits | bypassPermissions | plan | dontAsk | auto`.
-- **Repo name.** The GitHub repo is `grid-commander`; the product and package scope stay `Hex Command` / `@hexcommand/*` as the spec names them.
+- **Repo name.** The GitHub repo is `grid-commander`; the product and package scope stay `Grid Commander` / `@gridcommander/*` as the spec names them.
 
 ## M1
 
@@ -39,7 +39,7 @@ Recorded as the build progresses. Newest at the bottom.
 - **Zustand 5 selectors that build arrays/objects are wrapped in `useShallow`**; a fresh reference per call makes React 19 loop (error #185). The store itself keeps maps keyed by id so plain field selectors are stable.
 - **Static client serving uses wildcard routing** (`@fastify/static` default) with an SPA fallback for extension-less GETs, so a rebuilt client with new asset hashes is served without restarting the server.
 - **Token entry**: `?token=` on the URL is moved into localStorage and stripped from the address bar; otherwise a gate form asks for it. A 401 on reconnect clears it and re-shows the gate.
-- **Playwright smoke test runs against the real server** (`packages/server/dist`) with `fleet.example.json` and an in-memory DB: all units stay offline, so no Claude login is needed. Headless Chromium renders the scene through SwiftShader; `pnpm --filter @hexcommand/client test:e2e`.
+- **Playwright smoke test runs against the real server** (`packages/server/dist`) with `fleet.example.json` and an in-memory DB: all units stay offline, so no Claude login is needed. Headless Chromium renders the scene through SwiftShader; `pnpm --filter @gridcommander/client test:e2e`.
 
 ## M4
 
@@ -78,3 +78,7 @@ Recorded as the build progresses. Newest at the bottom.
 - **Transcript export** is `GET /api/units/:id/transcript.md` (newest 5 000 rows rendered as Markdown) with a button in the unit's Settings tab; the client fetches with the bearer token and triggers a download.
 - **Nightly pruning** keeps the newest 5 000 transcript rows per unit (24 h interval from boot, not at a fixed hour).
 - **`TmuxRuntime` was not built.** The `Runtime` interface and `RuntimeFactory` are the seam for it; `DemoRuntime` is a second implementation that proves the seam holds.
+
+## Naming
+
+- The product is called **Grid Commander** everywhere (operator request, 2026-10-13). The spec documents originally said "Hex Command"; they, the package scope (`@gridcommander/*`), PWA manifest, storage keys and system prompt were all renamed in one pass.

@@ -72,7 +72,7 @@ Alert tile: left stripe by kind (blue waiting, red error, gold done, amber idle,
 
 ## PWA
 
-- `vite-plugin-pwa` with `registerType: "autoUpdate"`, manifest: name "Hex Command", `display: standalone`, `orientation: any`, theme `#0b0f14`, icons 192/512 (a gold hexagon with a star, generated SVG → PNG at build).
+- `vite-plugin-pwa` with `registerType: "autoUpdate"`, manifest: name "Grid Commander", `display: standalone`, `orientation: any`, theme `#0b0f14`, icons 192/512 (a gold hexagon with a star, generated SVG → PNG at build).
 - Service worker precaches the app shell; API and WS are network-only. Offline: the app opens, shows the last snapshot from IndexedDB (idb-keyval) with a red "offline" pill, and all commands are disabled.
 - Web Push: client asks for permission from a settings toggle, subscribes with the server's VAPID key, posts the subscription. Notifications deep-link to `/#unit-<id>`; the app selects that unit on load. Push only arrives while Chrome is alive on Android; document this limitation in the settings UI.
 - HTTPS is required for installability and push: README documents `tailscale serve` (recommended) and `mkcert` for LAN.

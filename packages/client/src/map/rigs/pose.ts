@@ -1,5 +1,5 @@
 import type { Object3D, MeshStandardMaterial } from "three";
-import type { UnitStatus, UnitTypeDef } from "@hexcommand/shared";
+import type { UnitStatus, UnitTypeDef } from "@gridcommander/shared";
 
 export type WorkAnim = UnitTypeDef["workAnim"];
 

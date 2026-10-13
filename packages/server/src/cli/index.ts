@@ -6,7 +6,7 @@
 import { parseArgs } from "node:util";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { getUnitType, type Project } from "@hexcommand/shared";
+import { getUnitType, type Project } from "@gridcommander/shared";
 import { loadEnv, loadFleetConfig } from "../config.js";
 import { UnitRuntime, realSdk } from "../runtime/UnitRuntime.js";
 import { buildUnitSystemPrompt } from "../runtime/systemPrompt.js";

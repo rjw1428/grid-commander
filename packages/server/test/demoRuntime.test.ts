@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { UnitStatus } from "@hexcommand/shared";
+import type { UnitStatus } from "@gridcommander/shared";
 import { DemoRuntime } from "../src/runtime/DemoRuntime.js";
 
 const mk = () => new DemoRuntime({ unitId: "d", name: "d", model: "sonnet", permissionMode: "default", speed: 0.02 });

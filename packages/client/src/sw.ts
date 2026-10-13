@@ -24,7 +24,7 @@ interface PushPayload {
 }
 
 self.addEventListener("push", (event) => {
-  let data: PushPayload = { title: "Hex Command", body: "", tag: "hexcommand", url: "/", kind: "info" };
+  let data: PushPayload = { title: "Grid Commander", body: "", tag: "gridcommander", url: "/", kind: "info" };
   try {
     if (event.data) data = { ...data, ...(event.data.json() as Partial<PushPayload>) };
   } catch {

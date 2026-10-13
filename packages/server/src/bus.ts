@@ -1,4 +1,4 @@
-import type { WsServerEvent } from "@hexcommand/shared";
+import type { WsServerEvent } from "@gridcommander/shared";
 import { Emitter } from "./runtime/emitter.js";
 
 /** Server-wide event bus: services publish WS events; the WS layer fans them out to clients. */

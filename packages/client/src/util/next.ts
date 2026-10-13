@@ -1,4 +1,4 @@
-import type { Unit } from "@hexcommand/shared";
+import type { Unit } from "@gridcommander/shared";
 
 /** Units that need the operator, most urgent first: waiting, then error, then done. */
 export function attentionQueue(units: Unit[]): Unit[] {

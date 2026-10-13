@@ -8,8 +8,8 @@ import type {
   Team,
   TranscriptEntry,
   Unit,
-} from "@hexcommand/shared";
-import { SettingsSchema } from "@hexcommand/shared";
+} from "@gridcommander/shared";
+import { SettingsSchema } from "@gridcommander/shared";
 import type { Db } from "./db.js";
 
 const parse = <T>(s: string): T => JSON.parse(s) as T;

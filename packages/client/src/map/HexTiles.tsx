@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import type { ThreeEvent } from "@react-three/fiber";
-import { hexToWorld, type Hex, type Project } from "@hexcommand/shared";
+import { hexToWorld, type Hex, type Project } from "@gridcommander/shared";
 
 export const TILE_GEO = new THREE.CylinderGeometry(0.96, 0.99, 0.35, 6);
 export const TILE_TOP_Y = 0; // tiles are positioned so their top face sits at y = 0

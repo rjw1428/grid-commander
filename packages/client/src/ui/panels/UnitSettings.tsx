@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { PermissionMode, Unit } from "@hexcommand/shared";
+import type { PermissionMode, Unit } from "@gridcommander/shared";
 import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { useCommands } from "../CommandBar.js";

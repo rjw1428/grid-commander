@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Group, Mesh, MeshStandardMaterial } from "three";
 import { poseSoldier, type RigParts, STATUS_COLORS } from "../src/map/rigs/pose.js";
-import type { UnitStatus, UnitTypeDef } from "@hexcommand/shared";
+import type { UnitStatus, UnitTypeDef } from "@gridcommander/shared";
 
 function rig(): RigParts {
   const g = () => new Group();
