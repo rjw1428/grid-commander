@@ -71,3 +71,10 @@ Recorded as the build progresses. Newest at the bottom.
 - **Push coalescing** is per unit (or per kind for unit-less alerts) with a 60 s window; refreshed tiles (idle minutes ticking) do not re-push, except `waiting`, which is always news. 404/410 from the push service prune the subscription.
 - **Mobile camera nudge**: the sheet height (52 % / 78 %) is passed as `focusOffsetY` and the camera target is pushed toward the camera so the focused unit sits above the sheet.
 - **Push on a physical phone was not verified in this environment** (no Android device attached). The plumbing is covered by `push.test.ts` (sender, coalescing, pruning) and the SW handlers are exercised by Chromium only for registration; test the first push with `tailscale serve` as the README describes.
+
+## M7
+
+- **Context watchdog** polls `getContextUsage()` for running units every 5 min (`contextCheckMs`) and raises one `info` alert per unit at ≥70 %, re-armed when usage drops under 50 %.
+- **Transcript export** is `GET /api/units/:id/transcript.md` (newest 5 000 rows rendered as Markdown) with a button in the unit's Settings tab; the client fetches with the bearer token and triggers a download.
+- **Nightly pruning** keeps the newest 5 000 transcript rows per unit (24 h interval from boot, not at a fixed hour).
+- **`TmuxRuntime` was not built.** The `Runtime` interface and `RuntimeFactory` are the seam for it; `DemoRuntime` is a second implementation that proves the seam holds.

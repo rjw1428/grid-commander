@@ -33,6 +33,8 @@ export interface HubOptions {
   autoStartOnOrder?: boolean;
   pushEnabled?: boolean;
   nudgeIntervalMs?: number;
+  /** Context-usage check interval; 0 disables. */
+  contextCheckMs?: number;
   /** Web Push sender; when present, alerts of the configured kinds are pushed. */
   pushSender?: PushSender;
   pushCoalesceMs?: number;
@@ -50,6 +52,8 @@ export interface Hub {
   push?: PushService;
   settings(): Settings;
   patchSettings(p: Partial<Settings>): Settings;
+  /** Raise an info alert for running units whose context is ≥70 % full. */
+  checkContext(): Promise<void>;
   snapshot(): Snapshot;
   /** Load fleet.json + DB, report units that were mid-turn, start autostart units. */
   boot(cfg: FleetConfig, opts?: { autostart?: boolean }): Promise<void>;
@@ -105,6 +109,21 @@ export function createHub(opts: HubOptions): Hub {
   const alerts = new AlertEngine({ stores, bus, fleet, units, settings: () => settingsCache, log: opts.log, watchdogMs: opts.watchdogMs });
   const comms = new CommsBroker({ stores, fleet, units, orders, alerts, bus, settings: () => settingsCache, log: opts.log, nudgeIntervalMs: opts.nudgeIntervalMs });
   commsRef.current = comms;
+  const warnedContext = new Set<string>();
+  const checkContext = async () => {
+    for (const id of units.runtimes.keys()) {
+      const u = fleet.units.get(id);
+      if (!u || u.status === "offline") continue;
+      const usage = await units.contextUsage(id).catch(() => undefined);
+      if (usage === undefined) continue;
+      if (usage >= 0.7 && !warnedContext.has(id)) {
+        warnedContext.add(id);
+        alerts.raise({ kind: "info", unitId: id, title: `${u.name}: context ${Math.round(usage * 100)}% full`, body: "Consider /compact before the next long task.", payload: { contextUsage: usage } });
+      } else if (usage < 0.5) warnedContext.delete(id);
+    }
+  };
+  let contextTimer: NodeJS.Timeout | null = null;
+  let pruneTimer: NodeJS.Timeout | null = null;
   const push = opts.pushSender ? new PushService({ alerts, store: stores.push, settings: () => settingsCache, send: opts.pushSender, log: opts.log, coalesceMs: opts.pushCoalesceMs }) : undefined;
   const startedAt = Date.now();
   const publishInfo = () => bus.publish({ type: "server.info", info: hub.snapshot().server });
@@ -152,6 +171,16 @@ export function createHub(opts: HubOptions): Hub {
       const { wasWorking } = fleet.load(cfg);
       alerts.start();
       push?.start();
+      const ctxMs = opts.contextCheckMs ?? 5 * 60_000;
+      if (ctxMs > 0) {
+        contextTimer = setInterval(() => void checkContext(), ctxMs);
+        contextTimer.unref?.();
+      }
+      pruneTimer = setInterval(() => {
+        const n = stores.transcript.pruneAll(5000);
+        if (n) opts.log.info({ pruned: n }, "transcript pruned");
+      }, 24 * 3600 * 1000);
+      pruneTimer.unref?.();
       for (const u of wasWorking) {
         alerts.raise({ kind: "info", unitId: u.id, title: u.name, body: "was mid-turn when the server stopped; resume with Start" });
       }
@@ -166,9 +195,12 @@ export function createHub(opts: HubOptions): Hub {
         }
       }
     },
+    checkContext,
     async shutdown() {
       alerts.stop();
       push?.stop();
+      if (contextTimer) clearInterval(contextTimer);
+      if (pruneTimer) clearInterval(pruneTimer);
       await units.shutdown();
       fleet.flush();
       db.close();

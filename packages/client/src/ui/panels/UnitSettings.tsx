@@ -7,6 +7,23 @@ import { reportError } from "../Toasts.js";
 
 const MODES: PermissionMode[] = ["default", "acceptEdits", "plan", "bypassPermissions", "dontAsk", "auto"];
 
+async function exportTranscript(id: string, name: string) {
+  try {
+    const { getToken } = await import("../../api/token.js");
+    const res = await fetch(`/api/units/${id}/transcript.md`, { headers: { authorization: `Bearer ${getToken() ?? ""}` } });
+    if (!res.ok) throw new Error(`export failed (${res.status})`);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}-transcript.md`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (err) {
+    reportError(err);
+  }
+}
+
 export function UnitSettings({ unit }: { unit: Unit }) {
   const teams = useFleet((s) => s.teams);
   const projects = useFleet((s) => s.projects);
@@ -103,6 +120,9 @@ export function UnitSettings({ unit }: { unit: Unit }) {
         <button type="button" className="hbtn" onClick={move}>
           Move on map (M)
         </button>
+        <a className="hbtn" href={`/api/units/${unit.id}/transcript.md`} download={`${unit.name}-transcript.md`} onClick={(e) => { e.preventDefault(); void exportTranscript(unit.id, unit.name); }}>
+          Export transcript (.md)
+        </a>
         <button type="button" className="hbtn danger" onClick={remove}>
           Remove unit
         </button>

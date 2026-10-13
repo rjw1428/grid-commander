@@ -77,6 +77,15 @@ describe("REST contract", () => {
 
     const tr = await c.req("GET", "/units/xre-cache/transcript?limit=10");
     expect(tr.json.entries.map((e: { kind: string }) => e.kind)).toEqual(["user", "assistant", "result"]);
+    const md = await c.app.inject({ method: "GET", url: "/api/units/xre-cache/transcript.md", headers: c.auth });
+    expect(md.statusCode).toBe(200);
+    expect(md.headers["content-type"]).toMatch(/markdown/);
+    expect(md.body).toMatch(/^# xre-cache — transcript/);
+    expect(md.body).toMatch(/say ready/);
+    expect(md.body).toMatch(/\*\*result\*\*/);
+    // context watchdog: the fake SDK reports 42 % → no alert; force the threshold path
+    await c.hub.checkContext();
+    expect(c.hub.alerts.list().some((a) => /context/.test(a.title))).toBe(false);
 
     const alerts = await c.req("GET", "/alerts");
     expect(alerts.json.some((a: { kind: string; unitId: string }) => a.kind === "done" && a.unitId === "xre-cache")).toBe(true);

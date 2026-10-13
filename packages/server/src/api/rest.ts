@@ -65,6 +65,13 @@ export function registerRest(api: FastifyInstance, deps: RestDeps): void {
 
   api.get("/units/:id/orders", async (req) => orders.pending(fleet.getUnit(id(req.params)).id));
 
+  api.get("/units/:id/transcript.md", async (req, reply) => {
+    const unit = fleet.getUnit(id(req.params));
+    const entries = units.transcript(unit.id, { limit: 5000 });
+    reply.header("content-type", "text/markdown; charset=utf-8").header("content-disposition", `attachment; filename="${unit.name}-transcript.md"`);
+    return transcriptToMarkdown(unit.name, entries);
+  });
+
   api.get("/units/:id/messages", async (req) => {
     const unit = fleet.getUnit(id(req.params));
     const q = parse(MessagesQuerySchema, req.query);
@@ -230,6 +237,34 @@ export function registerRest(api: FastifyInstance, deps: RestDeps): void {
   });
 
   api.get("/unit-types", async () => hub.snapshot().unitTypes);
+}
+
+export function transcriptToMarkdown(name: string, entries: import("@hexcommand/shared").TranscriptEntry[]): string {
+  const ts = (at: number) => new Date(at).toISOString().replace("T", " ").slice(0, 19);
+  const out: string[] = [`# ${name} — transcript`, ""];
+  for (const e of entries) {
+    switch (e.kind) {
+      case "user":
+        out.push(`## ${ts(e.at)} · ${e.source}`, "", e.text, "");
+        break;
+      case "assistant":
+        out.push(e.text, "");
+        break;
+      case "tool":
+        out.push(`- \`${e.summary}\`${e.ok === false ? " ✗" : e.ok ? " ✓" : ""}${e.durationMs !== undefined ? ` (${e.durationMs} ms)` : ""}`);
+        break;
+      case "result":
+        out.push("", `> **${e.ok ? "result" : "error"}** ${ts(e.at)}${e.costUsd !== undefined ? ` · $${e.costUsd.toFixed(4)}` : ""}`, ">", ...e.text.split("\n").map((l) => `> ${l}`), "");
+        break;
+      case "message":
+        out.push(`- ✉ ${e.direction === "in" ? "in" : "out"}: ${e.text ?? e.messageId}`);
+        break;
+      case "system":
+        out.push(`_${e.text}_`, "");
+        break;
+    }
+  }
+  return out.join("\n").replace(/\n{3,}/g, "\n\n") + "\n";
 }
 
 export function resolveBroadcast(
