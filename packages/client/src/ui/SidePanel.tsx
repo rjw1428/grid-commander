@@ -1,6 +1,7 @@
 import { useFleet } from "../store/useFleet.js";
 import { Legend } from "./Legend.js";
 import { RecruitDialog } from "./RecruitDialog.js";
+import { ProjectDialog } from "./ProjectDialog.js";
 import { GroupPanel } from "./panels/GroupPanel.js";
 import { ProjectPanel } from "./panels/ProjectPanel.js";
 import { UnitPanel } from "./panels/UnitPanel.js";
@@ -41,6 +42,7 @@ export function SidePanel({ className = "side-panel", messagesTab }: { className
       {panel.kind === "team" && <GroupPanel ids={teams[panel.id]?.memberIds ?? []} onClose={close} title={teams[panel.id]?.name} />}
       {panel.kind === "project" && <ProjectPanel id={panel.id} onClose={close} />}
       {panel.kind === "recruit" && <RecruitDialog projectId={panel.projectId} onClose={closeOnly} />}
+      {panel.kind === "newProject" && <ProjectDialog onClose={closeOnly} />}
       {panel.kind === "messages" && <AllMessages onClose={closeOnly} />}
       {panel.kind === "settings" && <SettingsPanel onClose={closeOnly} />}
     </aside>

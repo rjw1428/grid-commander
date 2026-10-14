@@ -1,10 +1,11 @@
-import { mkdtempSync, readFileSync, existsSync } from "node:fs";
+import { mkdtempSync, readFileSync, existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { FleetConfigSchema } from "@gridcommander/shared";
 import { hexSpiral } from "../src/fleet/FleetService.js";
 import { createTestHub, exampleFleet, until } from "./helpers.js";
+import { loadFleetConfig } from "../src/config.js";
 
 describe("FleetService", () => {
   it("loads fleet.example.json: structure from config, runtime fields from DB", async () => {
@@ -77,6 +78,41 @@ describe("FleetService", () => {
     const cfg = FleetConfigSchema.parse(JSON.parse(readFileSync(path, "utf8")));
     expect(cfg.units.find((u) => u.id === "wb-unit")).toMatchObject({ type: "sniper", projectId: "web", task: "look around", autostart: false });
     expect(cfg.projects.length).toBe(4);
+  });
+
+  it("boots from an empty fleet and builds projects of each size without overlap", async () => {
+    const t = createTestHub();
+    await t.hub.boot(FleetConfigSchema.parse({}), { autostart: false });
+    expect(t.hub.fleet.projects.size).toBe(0);
+    const a = t.hub.fleet.createProject({ name: "Alpha", cwd: "/tmp/a" });
+    const b = t.hub.fleet.createProject({ name: "Bravo", cwd: "/tmp/b", size: 19 });
+    const c = t.hub.fleet.createProject({ name: "Charlie", cwd: "/tmp/c", size: 37 });
+    expect(a.cells.length).toBe(7);
+    expect(b.cells.length).toBe(19);
+    expect(c.cells.length).toBe(37);
+    const all = [...a.cells, ...b.cells, ...c.cells].map(String);
+    expect(new Set(all).size).toBe(all.length);
+    // palette colours assigned, slug ids
+    expect(b.id).toBe("bravo");
+    expect(a.tint).not.toBe(b.tint);
+    // grow Alpha by one hex adjacent to it, then shrink it
+    const [q, r] = a.cells[0]!;
+    const extra: [number, number] = [q + 1, r];
+    const taken = new Set(all);
+    if (!taken.has(String(extra))) {
+      const grown = t.hub.fleet.patchProject("alpha", { cells: [...a.cells, extra] });
+      expect(grown.cells.length).toBe(8);
+    }
+    const u = t.hub.fleet.createUnit({ name: "a1", type: "infantry", projectId: "alpha" });
+    expect(() => t.hub.fleet.patchProject("alpha", { cells: a.cells.filter((h) => String(h) !== String(u.hex)) })).toThrow(/occupied/);
+  });
+
+  it("loadFleetConfig treats an empty or missing file as an empty fleet", () => {
+    const dir = mkdtempSync(join(tmpdir(), "gridcommander-cfg-"));
+    const empty = join(dir, "fleet.json");
+    writeFileSync(empty, "");
+    expect(loadFleetConfig(empty)).toEqual({ projects: [], teams: [], units: [] });
+    expect(loadFleetConfig(join(dir, "missing.json"))).toEqual({ projects: [], teams: [], units: [] });
   });
 
   it("hexSpiral yields distinct hexes ring by ring", () => {

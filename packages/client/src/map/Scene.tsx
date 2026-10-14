@@ -1,6 +1,8 @@
 import { Suspense, useCallback, useMemo, useState } from "react";
 import { Canvas, type ThreeEvent } from "@react-three/fiber";
-import { hexToWorld, type Project, type Unit } from "@gridcommander/shared";
+import { hexKey, hexToWorld, type Hex, type Project, type Unit } from "@gridcommander/shared";
+import { growthCandidates } from "../util/territory.js";
+import { GhostTiles } from "./GhostTiles.js";
 import { useFleet } from "../store/useFleet.js";
 import { Borders } from "./Borders.js";
 import { CameraRig } from "./CameraRig.js";
@@ -17,9 +19,11 @@ export interface SceneProps {
   focusOffsetY?: number;
   /** Return true to consume the click (e.g. move mode); false falls through to territory selection. */
   onTileClick?: (tile: TileRef, e: ThreeEvent<MouseEvent>) => boolean;
+  /** territory mode: a free candidate hex was clicked */
+  onGhostClick?: (hex: Hex) => void;
 }
 
-export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
+export function Scene({ mobile, focusOffsetY, onTileClick, onGhostClick }: SceneProps) {
   const projectsMap = useFleet((s) => s.projects);
   const unitsMap = useFleet((s) => s.units);
   const teams = useFleet((s) => s.teams);
@@ -27,12 +31,14 @@ export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
   const selection = useFleet((s) => s.selection);
   const hover = useFleet((s) => s.hover);
   const mode = useFleet((s) => s.mode);
+  const territoryId = useFleet((s) => s.territoryProjectId);
   const select = useFleet((s) => s.select);
   const toggleSelect = useFleet((s) => s.toggleSelect);
   const clearSelection = useFleet((s) => s.clearSelection);
   const setHover = useFleet((s) => s.setHover);
   const reducedMotion = useReducedMotion();
   const [tileHover, setTileHover] = useState<TileRef | null>(null);
+  const [ghostHover, setGhostHover] = useState<Hex | null>(null);
 
   const projects = useMemo(() => Object.values(projectsMap), [projectsMap]);
   const units = useMemo(() => Object.values(unitsMap), [unitsMap]);
@@ -64,6 +70,8 @@ export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
   );
 
   const hoverKey = tileHover ? `${tileHover.hex[0]},${tileHover.hex[1]}` : null;
+  const territoryProject = mode === "territory" && territoryId ? projectsMap[territoryId] : undefined;
+  const ghosts = useMemo(() => (territoryProject ? growthCandidates(territoryProject, projects) : []), [territoryProject, projects]);
 
   return (
     <>
@@ -98,6 +106,7 @@ export function Scene({ mobile, focusOffsetY, onTileClick }: SceneProps) {
           <Sea />
           <HexTiles projects={projects} hoverKey={hoverKey} onHover={setTileHover} onClick={handleTileClick} />
           <Borders projects={projects} />
+          {territoryProject && <GhostTiles cells={ghosts} tint={territoryProject.tint} hoverKey={ghostHover ? hexKey(ghostHover) : null} onHover={setGhostHover} onClick={(h) => onGhostClick?.(h)} />}
           {units.map((u) => {
             const type = unitTypes[u.type];
             const project = projectsMap[u.projectId];

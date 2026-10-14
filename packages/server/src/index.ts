@@ -1,4 +1,5 @@
-import { existsSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { randomBytes } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pino from "pino";
@@ -10,6 +11,22 @@ import { VERSION } from "./version.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+/** Without FLEET_TOKEN, keep a generated token next to the database so `pnpm start` needs no ceremony. */
+function loadOrCreateToken(file: string, log: pino.Logger): string {
+  if (existsSync(file)) {
+    const t = readFileSync(file, "utf8").trim();
+    if (t.length >= 8) {
+      log.info({ tokenFile: file }, "FLEET_TOKEN not set; using the token file");
+      return t;
+    }
+  }
+  mkdirSync(dirname(file), { recursive: true });
+  const t = randomBytes(24).toString("hex");
+  writeFileSync(file, t + "\n", { mode: 0o600 });
+  log.info({ tokenFile: file }, "FLEET_TOKEN not set; generated a token file. Open /?token=$(cat <tokenFile>)");
+  return t;
+}
+
 async function main() {
   const env = loadEnv();
   const log = pino({ level: env.LOG_LEVEL, redact: ["*.token", "*.authorization"] });
@@ -20,6 +37,7 @@ async function main() {
   const fleetRoot = env.FLEET_ROOT ? resolve(base, env.FLEET_ROOT) : base;
   if (!existsSync(configPath)) log.warn({ configPath }, "fleet config not found; starting with an empty fleet");
   const fleet = loadFleetConfig(configPath);
+  const token = env.FLEET_TOKEN ?? loadOrCreateToken(join(dirname(dbPath), "token"), log);
 
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
@@ -43,7 +61,7 @@ async function main() {
 
   const clientDist = env.CLIENT_DIST ? resolve(env.CLIENT_DIST) : resolve(here, "../../client/dist");
   const app = await buildApp({
-    token: env.FLEET_TOKEN,
+    token,
     logLevel: env.LOG_LEVEL,
     hub,
     clientDist,

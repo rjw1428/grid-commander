@@ -83,3 +83,11 @@ Recorded as the build progresses. Newest at the bottom.
 
 - The product is called **Grid Commander** everywhere (operator request, 2026-10-13). The spec documents originally said "Hex Command"; they, the package scope (`@gridcommander/*`), PWA manifest, storage keys and system prompt were all renamed in one pass.
 - **Relative `FLEET_CONFIG` / `FLEET_DB` / `FLEET_ROOT` resolve against `INIT_CWD`** (the directory `pnpm start` was invoked from), not `packages/server`, and a missing fleet file logs a warning instead of silently starting empty.
+
+## Building the fleet from the UI (2026-10-14)
+
+- **`fleet.json` is optional.** A missing or empty file is an empty fleet; everything can be founded from the UI and is written back. Playwright passes absolute paths because relative `FLEET_*` paths resolve against `INIT_CWD`.
+- **Projects are founded from the UI** (`+ Project` in the header, `P`, the command bar, the mobile command sheet, or the open-water empty state) with a name, working directory and a territory size of 7, 19 or 37 hexes. The server places the cluster in free water with a one-hex gap (`CreateProjectBody.size`); colours come from the palette.
+- **Territory mode** (project panel → Edit territory) shows translucent candidate hexes: free neighbours of the territory that are not adjacent to another project, so the water gap is preserved. Clicking a candidate claims it, clicking an owned hex releases it; a hex with a unit on it and the last hex cannot be released. Each click is one `PATCH /projects/:id {cells}`, validated server-side.
+- **Project details** (name, cwd, tint, flag) are edited in the panel; deletion is a two-step inline confirm and refused while units remain.
+- **Token file.** With `FLEET_TOKEN` unset the server generates a 48-hex token into `<data dir>/token` (mode 0600) and logs the file path, never the token.

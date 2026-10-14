@@ -4,6 +4,8 @@ import { api } from "./api/client.js";
 import { getToken, setToken } from "./api/token.js";
 import { Scene } from "./map/Scene.js";
 import type { TileRef } from "./map/HexTiles.js";
+import type { Hex } from "@gridcommander/shared";
+import { removeBlocker } from "./util/territory.js";
 import { persistSnapshots, registerPwa, restoreSnapshotIfOffline } from "./pwa.js";
 import { selectCanCommand, useFleet } from "./store/useFleet.js";
 import { AlertStack, useAlertSounds } from "./ui/AlertStack.js";
@@ -29,6 +31,7 @@ export function App() {
   const mode = useFleet((s) => s.mode);
   const sheet = useFleet((s) => s.sheet);
   const canCommand = useFleet(selectCanCommand);
+  const projectCount = useFleet((s) => Object.keys(s.projects).length);
   const commands = useCommands();
   useAlertSounds();
 
@@ -74,6 +77,7 @@ export function App() {
       switch (e.key) {
         case "Escape":
           if (s.mode === "move") s.exitMove();
+          else if (s.mode === "territory") s.exitTerritory();
           else if (s.selection.length === 1 && (s.units[s.selection[0]!]?.status === "working" || s.units[s.selection[0]!]?.status === "waiting")) {
             api.units.interrupt(s.selection[0]!).catch(reportError);
           } else {
@@ -103,6 +107,10 @@ export function App() {
         case "L":
           toggleLegend();
           return;
+        case "p":
+        case "P":
+          commands.newProject();
+          return;
         default:
           return;
       }
@@ -111,9 +119,33 @@ export function App() {
     return () => window.removeEventListener("keydown", on);
   }, [commands, toggleLegend]);
 
-  // move mode: a tile click relocates the unit being moved
+  // territory mode: a ghost click claims the hex for the project being edited
+  const onGhostClick = useCallback((hex: Hex) => {
+    const s = useFleet.getState();
+    const p = s.territoryProjectId ? s.projects[s.territoryProjectId] : undefined;
+    if (!p) return;
+    api.projects.patch(p.id, { cells: [...p.cells, hex] }).catch(reportError);
+  }, []);
+
+  // move mode: a tile click relocates the unit being moved; territory mode: an own tile click releases it
   const onTileClick = useCallback((tile: TileRef) => {
     const s = useFleet.getState();
+    if (s.mode === "territory") {
+      const p = s.territoryProjectId ? s.projects[s.territoryProjectId] : undefined;
+      if (!p) return false;
+      if (tile.project.id !== p.id) {
+        s.toast({ kind: "error", text: `That hex belongs to ${tile.project.name}.` });
+        return true;
+      }
+      const why = removeBlocker(p, tile.hex, Object.values(s.units));
+      if (why) {
+        s.toast({ kind: "error", text: why });
+        return true;
+      }
+      const key = `${tile.hex[0]},${tile.hex[1]}`;
+      api.projects.patch(p.id, { cells: p.cells.filter((c) => `${c[0]},${c[1]}` !== key) }).catch(reportError);
+      return true;
+    }
     if (s.mode !== "move" || !s.moveUnitId) return false;
     const unit = s.units[s.moveUnitId];
     if (!unit) return false;
@@ -140,10 +172,19 @@ export function App() {
   const sheetPx = sheetOpen ? Math.round(window.innerHeight * (sheet === "detail" ? 0.52 : 0.78)) : 0;
 
   return (
-    <div className={`app${mobile ? " mobile" : ""}${mode === "move" ? " move-mode" : ""}${canCommand ? "" : " readonly"}`}>
+    <div className={`app${mobile ? " mobile" : ""}${mode === "move" ? " move-mode" : ""}${mode === "territory" ? " territory-mode" : ""}${canCommand ? "" : " readonly"}`}>
       <Header onLegend={toggleLegend} legendOpen={panel.kind === "legend"} compact={mobile} />
       <main className="stage">
-        {hasSnapshot ? <Scene mobile={mobile} onTileClick={onTileClick} focusOffsetY={mobile ? sheetPx / 2 : 0} /> : <div className="empty" style={{ padding: 24 }}>Connecting to the fleet server…</div>}
+        {hasSnapshot ? <Scene mobile={mobile} onTileClick={onTileClick} onGhostClick={onGhostClick} focusOffsetY={mobile ? sheetPx / 2 : 0} /> : <div className="empty" style={{ padding: 24 }}>Connecting to the fleet server…</div>}
+        {hasSnapshot && projectCount === 0 && panel.kind !== "newProject" && (
+          <div className="empty-state" role="region" aria-label="no projects">
+            <h2>Open water</h2>
+            <p>No projects yet. Found one to claim territory, then recruit units into it.</p>
+            <button type="button" className="btn" onClick={() => commands.newProject()} disabled={!canCommand}>
+              Found the first project
+            </button>
+          </div>
+        )}
         {!mobile && <CommandBar />}
         {!mobile && <AlertStack shifted={panel.kind !== "none"} />}
         {!mobile && <SidePanel />}
@@ -151,6 +192,7 @@ export function App() {
         {mobile && <Sheet />}
         <Toasts />
         {mode === "move" && <div className="mode-banner">Move mode: {mobile ? "tap" : "click"} a free hex · {mobile ? "" : "Esc to cancel"}</div>}
+        {mode === "territory" && <div className="mode-banner">Territory mode: {mobile ? "tap" : "click"} a faint hex to claim it, an owned hex to release it{mobile ? "" : " · Esc to finish"}</div>}
         {!canCommand && hasSnapshot && <div className="mode-banner offline">Offline: showing the last known state, commands disabled</div>}
       </main>
       {mobile ? <TabBar /> : <Tray />}

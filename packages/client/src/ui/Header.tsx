@@ -28,6 +28,9 @@ export function ConnectionPill() {
 export function Header({ onLegend, legendOpen, compact = false }: { onLegend: () => void; legendOpen: boolean; compact?: boolean }) {
   const counts = useFleet(useShallow(selectCounts));
   const server = useFleet((s) => s.server);
+  const projectCount = useFleet((s) => Object.keys(s.projects).length);
+  const panel = useFleet((s) => s.panel);
+  const setPanel = useFleet((s) => s.setPanel);
   if (compact) {
     return (
       <header className="header compact">
@@ -49,6 +52,9 @@ export function Header({ onLegend, legendOpen, compact = false }: { onLegend: ()
     <header className="header">
       <Brand />
       <div className="counters" aria-label="fleet counters">
+        <span className="counter">
+          <b>{projectCount}</b>projects
+        </span>
         <span className="counter">
           <b>{counts.units}</b>units
         </span>
@@ -72,6 +78,9 @@ export function Header({ onLegend, legendOpen, compact = false }: { onLegend: ()
       </div>
       <div className="spacer" />
       <ConnectionPill />
+      <button type="button" className={`hbtn${panel.kind === "newProject" ? " active" : ""}`} onClick={() => setPanel(panel.kind === "newProject" ? { kind: "none" } : { kind: "newProject" })} aria-pressed={panel.kind === "newProject"}>
+        + Project
+      </button>
       <button type="button" className={`hbtn${legendOpen ? " active" : ""}`} onClick={onLegend} aria-pressed={legendOpen}>
         Legend
       </button>

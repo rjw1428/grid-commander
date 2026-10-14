@@ -21,6 +21,7 @@ export function RecruitDialog({ projectId, onClose }: { projectId?: string; onCl
   const typeDef = unitTypes[type];
   const proj = projects[project];
   const free = proj ? proj.cells.length - Object.values(units).filter((u) => u.projectId === project).length : 0;
+  const noProjects = Object.keys(projects).length === 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,7 +56,15 @@ export function RecruitDialog({ projectId, onClose }: { projectId?: string; onCl
           ×
         </button>
       </header>
-      <form className="body form" onSubmit={submit}>
+      {noProjects && (
+        <div className="body">
+          <p className="empty">Units live inside a project's territory, and there are no projects yet.</p>
+          <button type="button" className="btn" onClick={() => useFleet.getState().setPanel({ kind: "newProject" })}>
+            Found a project
+          </button>
+        </div>
+      )}
+      {!noProjects && <form className="body form" onSubmit={submit}>
         <label>
           Name
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. xre-tests" autoFocus required maxLength={40} />
@@ -110,7 +119,7 @@ export function RecruitDialog({ projectId, onClose }: { projectId?: string; onCl
         <button type="submit" className="btn" disabled={busy || !name.trim() || free <= 0}>
           {busy ? "Recruiting…" : free <= 0 ? "No free hex" : "Recruit & start"}
         </button>
-      </form>
+      </form>}
     </>
   );
 }

@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const here = dirname(fileURLToPath(import.meta.url));
 const PORT = 7798;
 export const TOKEN = "playwright-token-0123456789";
 
@@ -16,10 +19,11 @@ export default defineConfig({
     env: {
       FLEET_TOKEN: TOKEN,
       FLEET_PORT: String(PORT),
-      FLEET_CONFIG: "./test-results/fleet.json",
+      // absolute: the server resolves relative paths against INIT_CWD (where pnpm was invoked)
+      FLEET_CONFIG: resolve(here, "test-results/fleet.json"),
       FLEET_DB: ":memory:",
       LOG_LEVEL: "warn",
-      CLIENT_DIST: "./dist",
+      CLIENT_DIST: resolve(here, "dist"),
       FLEET_DEMO: "1",
     },
     timeout: 30_000,

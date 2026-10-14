@@ -18,7 +18,19 @@ export function useCommands() {
     s.select([next.id]);
     s.focusUnit(next.id);
   };
-  const recruit = (projectId?: string) => st.getState().setPanel({ kind: "recruit", projectId });
+  const recruit = (projectId?: string) => {
+    const s = st.getState();
+    if (!Object.keys(s.projects).length) {
+      s.toast({ kind: "info", text: "Found a project first; units live inside a project's territory." });
+      return s.setPanel({ kind: "newProject" });
+    }
+    s.setPanel({ kind: "recruit", projectId });
+  };
+  const newProject = () => {
+    const s = st.getState();
+    s.exitTerritory();
+    s.setPanel(s.panel.kind === "newProject" ? { kind: "none" } : { kind: "newProject" });
+  };
   const broadcast = () => {
     const s = st.getState();
     const ids = s.selection.length ? s.selection : Object.keys(s.units);
@@ -54,7 +66,7 @@ export function useCommands() {
     if (enableSound()) s.setSound(true);
     else s.toast({ kind: "error", text: "Audio is not available in this browser." });
   };
-  return { nextOrders, recruit, broadcast, move, haltAll, compactIdle, toggleSound };
+  return { nextOrders, recruit, newProject, broadcast, move, haltAll, compactIdle, toggleSound };
 }
 
 export function CommandBar() {
@@ -71,6 +83,9 @@ export function CommandBar() {
       </button>
       <button type="button" className={`cmd${panel.kind === "recruit" ? " active" : ""}`} onClick={run(() => c.recruit())} title="Recruit a unit (R)">
         <span className="k">R</span>Recruit
+      </button>
+      <button type="button" className={`cmd${panel.kind === "newProject" ? " active" : ""}`} onClick={run(c.newProject)} title="Found a new project (P)">
+        <span className="k">P</span>New project
       </button>
       <button type="button" className="cmd" onClick={run(c.broadcast)} title="Broadcast to the selection or the fleet (B)">
         <span className="k">B</span>Broadcast

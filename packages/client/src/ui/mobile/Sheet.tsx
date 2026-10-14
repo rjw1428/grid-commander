@@ -153,6 +153,9 @@ function CommandsList() {
       <button type="button" className="cmd" onClick={run(() => c.recruit(), "detail")}>
         Recruit a unit
       </button>
+      <button type="button" className="cmd" onClick={run(c.newProject, "detail")}>
+        New project
+      </button>
       <button type="button" className="cmd" onClick={run(c.broadcast, "detail")}>
         Broadcast to selection / fleet
       </button>

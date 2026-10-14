@@ -14,7 +14,7 @@ import type {
 } from "@gridcommander/shared";
 
 export type Connection = "connecting" | "live" | "offline";
-export type Mode = "idle" | "move" | "multi";
+export type Mode = "idle" | "move" | "multi" | "territory";
 export type SheetMode = "closed" | "units" | "alerts" | "commands" | "detail";
 export type PanelView =
   | { kind: "none" }
@@ -24,6 +24,7 @@ export type PanelView =
   | { kind: "team"; id: string }
   | { kind: "legend" }
   | { kind: "recruit"; projectId?: string }
+  | { kind: "newProject" }
   | { kind: "messages" }
   | { kind: "settings" };
 
@@ -58,6 +59,8 @@ export interface FleetState {
   multi: boolean;
   /** unit being moved in move mode (first selection when the mode was entered) */
   moveUnitId: string | null;
+  /** project whose territory is being edited in territory mode */
+  territoryProjectId: string | null;
 
   applySnapshot: (s: Snapshot) => void;
   applyEvent: (e: WsServerEvent) => void;
@@ -80,6 +83,8 @@ export interface FleetState {
   dismissToast: (id: number) => void;
   enterMove: (unitId: string) => void;
   exitMove: () => void;
+  enterTerritory: (projectId: string) => void;
+  exitTerritory: () => void;
   setCachedAt: (at: number | null) => void;
   setMulti: (on: boolean) => void;
 }
@@ -117,6 +122,7 @@ export const useFleet = create<FleetState>((set, get) => ({
   cachedAt: null,
   multi: false,
   moveUnitId: null,
+  territoryProjectId: null,
 
   applySnapshot: (s) =>
     set((st) => ({
@@ -192,7 +198,12 @@ export const useFleet = create<FleetState>((set, get) => ({
         set((st) => {
           const projects = { ...st.projects };
           delete projects[e.id];
-          return { projects };
+          const closing = st.panel.kind === "project" && st.panel.id === e.id;
+          return {
+            projects,
+            ...(closing ? { panel: { kind: "none" } as PanelView } : {}),
+            ...(st.territoryProjectId === e.id ? { mode: "idle" as Mode, territoryProjectId: null } : {}),
+          };
         });
         return;
       case "team.upsert":
@@ -246,8 +257,10 @@ export const useFleet = create<FleetState>((set, get) => ({
     setTimeout(() => get().dismissToast(id), t.kind === "error" ? 6000 : 3500);
   },
   dismissToast: (id) => set((st) => ({ toasts: st.toasts.filter((t) => t.id !== id) })),
-  enterMove: (moveUnitId) => set({ mode: "move", moveUnitId }),
+  enterMove: (moveUnitId) => set({ mode: "move", moveUnitId, territoryProjectId: null }),
   exitMove: () => set({ mode: "idle", moveUnitId: null }),
+  enterTerritory: (territoryProjectId) => set({ mode: "territory", territoryProjectId, moveUnitId: null, panel: { kind: "project", id: territoryProjectId } }),
+  exitTerritory: () => set((st) => (st.mode === "territory" ? { mode: "idle", territoryProjectId: null } : {})),
   setCachedAt: (cachedAt) => set({ cachedAt }),
   setMulti: (multi) => set({ multi, mode: multi ? "multi" : "idle" }),
 }));

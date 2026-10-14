@@ -119,11 +119,13 @@ export const CreateProjectBodySchema = z.object({
   tint: ColorSchema.optional(),
   flag: ColorSchema.optional(),
   cells: z.array(HexSchema).optional(),
+  /** Auto-allocated territory size when `cells` is omitted: 7 (radius 1), 19 (radius 2) or 37 (radius 3). */
+  size: z.union([z.literal(7), z.literal(19), z.literal(37)]).optional(),
   defaults: ProjectDefaultsSchema.optional(),
 });
 export type CreateProjectBody = z.infer<typeof CreateProjectBodySchema>;
 
-export const PatchProjectBodySchema = CreateProjectBodySchema.omit({ id: true }).partial();
+export const PatchProjectBodySchema = CreateProjectBodySchema.omit({ id: true, size: true }).partial();
 export type PatchProjectBody = z.infer<typeof PatchProjectBodySchema>;
 
 export const CreateTeamBodySchema = z.object({

@@ -310,7 +310,7 @@ export class FleetService {
     const id = body.id ?? slugify(body.name);
     if (this.projects.has(id)) throw conflict("id_taken", `project id "${id}" already exists`);
     const palette = PALETTE[this.projects.size % PALETTE.length]!;
-    const cells = body.cells?.length ? body.cells : this.#allocateTerritory(7);
+    const cells = body.cells?.length ? body.cells : this.#allocateTerritory(body.size ?? 7);
     this.#assertCellsFree(cells, id);
     const project: Project = {
       id,
@@ -515,12 +515,13 @@ export class FleetService {
     if (clash) throw conflict("cell_taken", `hex ${hexKey(clash)} belongs to another project`);
   }
 
-  /** A compact 7-hex cluster (centre + ring) in free space, searched outward from the origin. */
+  /** A compact hex cluster (radius 1 → 7, 2 → 19, 3 → 37) in free space, searched outward from the origin. */
   #allocateTerritory(size: number): Hex[] {
     const taken = this.#allCells();
-    const spiral = hexSpiral(60);
-    for (const centre of spiral) {
-      const cluster = [centre, ...hexNeighbors(centre)].slice(0, size);
+    const radius = size <= 7 ? 1 : size <= 19 ? 2 : 3;
+    const shape = hexSpiral(radius);
+    for (const [cq, cr] of hexSpiral(60)) {
+      const cluster: Hex[] = shape.map(([q, r]) => [q + cq, r + cr]);
       // keep one hex of water between territories
       const halo = new Set<string>();
       for (const c of cluster) for (const n of hexNeighbors(c)) halo.add(hexKey(n));

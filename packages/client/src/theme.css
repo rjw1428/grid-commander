@@ -658,8 +658,49 @@ h3.sec {
   font-size: 13px;
   z-index: 7;
 }
-.app.move-mode .stage canvas {
+.app.move-mode .stage canvas,
+.app.territory-mode .stage canvas {
   cursor: crosshair;
+}
+.empty-state {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  width: min(380px, calc(100vw - 32px));
+  padding: 20px 22px;
+  border: 1px solid var(--gold);
+  border-radius: 12px;
+  background: rgba(11, 15, 20, 0.86);
+  text-align: center;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.empty-state h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--gold-2);
+}
+.empty-state p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.color-row input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
 }
 
 /* ---------------------------------------------------------------- alerts */

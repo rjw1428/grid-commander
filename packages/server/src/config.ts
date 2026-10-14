@@ -4,7 +4,8 @@ import { resolve } from "node:path";
 import { FleetConfigSchema, type FleetConfig } from "@gridcommander/shared";
 
 const EnvSchema = z.object({
-  FLEET_TOKEN: z.string().min(8, "FLEET_TOKEN must be at least 8 characters"),
+  /** Bearer token; when unset the server reads/creates `<data dir>/token`. */
+  FLEET_TOKEN: z.string().min(8, "FLEET_TOKEN must be at least 8 characters").optional(),
   FLEET_HOST: z.string().default("127.0.0.1"),
   FLEET_PORT: z.coerce.number().int().positive().default(7777),
   FLEET_CONFIG: z.string().default("./fleet.json"),
@@ -41,7 +42,9 @@ export function loadFleetConfig(path: string): FleetConfig {
   if (!existsSync(abs)) {
     return FleetConfigSchema.parse({ projects: [], teams: [], units: [] });
   }
-  const raw = JSON.parse(readFileSync(abs, "utf8"));
+  const text = readFileSync(abs, "utf8");
+  // an empty file is a valid empty fleet: build everything from the UI
+  const raw: unknown = text.trim() ? JSON.parse(text) : {};
   const parsed = FleetConfigSchema.safeParse(raw);
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join("; ");

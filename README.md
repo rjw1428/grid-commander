@@ -13,12 +13,16 @@ Spec: `docs/` (start with `docs/00-overview.md`; build plan in `docs/06-mileston
 
 ```bash
 pnpm install
-cp fleet.example.json fleet.json        # edit project cwd paths to real repos
-export FLEET_TOKEN=$(openssl rand -hex 24)
 pnpm dev                                # server on :7777 (tsx watch) + Vite on :5173
 ```
 
-Open http://localhost:5173 and paste the token when prompted.
+Open http://localhost:5173 and paste the token when prompted. The token is read from `FLEET_TOKEN`, or, when that is unset, generated once and kept in `data/token`:
+
+```bash
+open "http://localhost:5173/?token=$(cat data/token)"
+```
+
+`fleet.json` is optional. With no file (or an empty one) the map starts as open water: found projects, reshape their territories and recruit units from the UI, and the server writes the result back to `fleet.json`. `fleet.example.json` shows the hand-written form if you prefer to start from a file (edit its `cwd` paths to real repos first).
 
 Production-style single process:
 
@@ -57,7 +61,7 @@ Then open Commands → Settings on the phone and tap "Enable push on this device
 
 | Var | Default | Purpose |
 |---|---|---|
-| `FLEET_TOKEN` | required | bearer token for REST and WS (`?token=` on WS upgrade) |
+| `FLEET_TOKEN` | generated | bearer token for REST and WS (`?token=` on WS upgrade); when unset, read from or written to `<data dir>/token` |
 | `FLEET_HOST` | `127.0.0.1` | bind address; `0.0.0.0` for LAN/Tailscale |
 | `FLEET_PORT` | `7777` | |
 | `FLEET_CONFIG` | `./fleet.json` | fleet definition; written back when you edit from the UI |
