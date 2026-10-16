@@ -1420,3 +1420,96 @@ a.hbtn {
   display: inline-flex;
   align-items: center;
 }
+
+/* ---------------------------------------------------------------- directory picker */
+.form .inputrow {
+  grid-template-columns: 1fr auto;
+}
+.dirpicker {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.dirpicker-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+}
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  font-size: 12px;
+  min-width: 0;
+}
+.crumb {
+  background: none;
+  border: 0;
+  color: var(--gold-2);
+  cursor: pointer;
+  padding: 2px 4px;
+  font: inherit;
+  font-size: 12px;
+}
+.crumb:disabled {
+  color: var(--text);
+  cursor: default;
+}
+.crumb-sep {
+  color: var(--dim);
+}
+.dirlist {
+  max-height: 240px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dirlist.busy {
+  opacity: 0.6;
+}
+.direntry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 36px;
+}
+.direntry:hover {
+  border-color: var(--line);
+  background: rgba(212, 167, 58, 0.08);
+}
+.direntry .ico {
+  color: var(--gold);
+  width: 14px;
+  text-align: center;
+}
+.direntry .dname {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.direntry.up {
+  color: var(--muted);
+}
+.roots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

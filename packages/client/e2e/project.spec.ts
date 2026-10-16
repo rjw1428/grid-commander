@@ -9,6 +9,12 @@ test("operator founds, edits and deletes a project from the UI", async ({ page }
   await expect(page.locator(".pill.live")).toBeVisible({ timeout: 15_000 });
 
   await page.getByRole("button", { name: "+ Project" }).click();
+  // the Browse… picker lists server directories and fills the field on pick
+  await page.getByRole("button", { name: "Browse…" }).click();
+  await expect(page.locator(".dirpicker .direntry").first()).toBeVisible({ timeout: 10_000 });
+  await page.locator(".dirpicker .btn", { hasText: "Use" }).click();
+  await expect(page.locator(".dirpicker")).toHaveCount(0);
+  await expect(page.getByPlaceholder("/Users/you/src/billing-api")).not.toHaveValue("");
   await page.getByPlaceholder("e.g. Billing API").fill("Side Quest");
   await page.getByPlaceholder("/Users/you/src/billing-api").fill("/tmp/side-quest");
   await page.getByLabel("Territory").selectOption("19");

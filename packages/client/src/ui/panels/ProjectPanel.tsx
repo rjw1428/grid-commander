@@ -4,6 +4,7 @@ import { api } from "../../api/client.js";
 import { useFleet } from "../../store/useFleet.js";
 import { STATUS_LABEL } from "../../util/format.js";
 import { reportError } from "../Toasts.js";
+import { DirPicker } from "../DirPicker.js";
 
 export function ProjectPanel({ id, onClose }: { id: string; onClose: () => void }) {
   const project = useFleet((s) => s.projects[id]);
@@ -22,6 +23,7 @@ export function ProjectPanel({ id, onClose }: { id: string; onClose: () => void 
   const [flag, setFlag] = useState("#000000");
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
 
   useEffect(() => {
     if (!project) return;
@@ -81,8 +83,23 @@ export function ProjectPanel({ id, onClose }: { id: string; onClose: () => void 
             </label>
             <label>
               Working directory <span className="hint">blank = fleet root</span>
-              <input className="input mono" value={cwd} onChange={(e) => setCwd(e.target.value)} placeholder="/path/to/repo" />
+              <span className="row2 inputrow">
+                <input className="input mono" value={cwd} onChange={(e) => setCwd(e.target.value)} placeholder="/path/to/repo" />
+                <button type="button" className={`hbtn${browsing ? " active" : ""}`} onClick={() => setBrowsing((b) => !b)} aria-expanded={browsing}>
+                  Browse…
+                </button>
+              </span>
             </label>
+            {browsing && (
+              <DirPicker
+                initial={cwd}
+                onPick={(p) => {
+                  setCwd(p);
+                  setBrowsing(false);
+                }}
+                onCancel={() => setBrowsing(false)}
+              />
+            )}
             <div className="row2">
               <label>
                 Territory tint

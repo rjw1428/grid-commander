@@ -15,6 +15,8 @@ const EnvSchema = z.object({
   FLEET_MAX_UNITS: z.coerce.number().int().positive().default(24),
   FLEET_PERMISSION_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
   FLEET_ROOT: z.string().optional(),
+  /** Comma-separated directories the working-directory picker may browse. Default: home dir + fleet root. */
+  FLEET_BROWSE_ROOTS: z.string().optional(),
   VAPID_PUBLIC_KEY: z.string().optional(),
   VAPID_PRIVATE_KEY: z.string().optional(),
   VAPID_SUBJECT: z.string().optional(),

@@ -3,6 +3,7 @@ import type { CreateProjectBody } from "@gridcommander/shared";
 import { api } from "../api/client.js";
 import { useFleet } from "../store/useFleet.js";
 import { reportError } from "./Toasts.js";
+import { DirPicker } from "./DirPicker.js";
 
 const SIZES: { value: 7 | 19 | 37; label: string }[] = [
   { value: 7, label: "Small · 7 hexes" },
@@ -16,6 +17,7 @@ export function ProjectDialog({ onClose }: { onClose: () => void }) {
   const [cwd, setCwd] = useState("");
   const [size, setSize] = useState<7 | 19 | 37>(7);
   const [busy, setBusy] = useState(false);
+  const [browsing, setBrowsing] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,9 +51,25 @@ export function ProjectDialog({ onClose }: { onClose: () => void }) {
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Billing API" autoFocus required maxLength={80} />
         </label>
         <label>
-          Working directory <span className="hint">absolute path of the repo on the server; blank = fleet root</span>
-          <input className="input mono" value={cwd} onChange={(e) => setCwd(e.target.value)} placeholder="/Users/you/src/billing-api" />
+          Working directory <span className="hint">repo folder on the server; blank = fleet root</span>
+          <span className="row2 inputrow">
+            <input className="input mono" value={cwd} onChange={(e) => setCwd(e.target.value)} placeholder="/Users/you/src/billing-api" />
+            <button type="button" className={`hbtn${browsing ? " active" : ""}`} onClick={() => setBrowsing((b) => !b)} aria-expanded={browsing}>
+              Browse…
+            </button>
+          </span>
         </label>
+        {browsing && (
+          <DirPicker
+            initial={cwd}
+            onPick={(p) => {
+              setCwd(p);
+              setBrowsing(false);
+              if (!name.trim()) setName(p.split("/").filter(Boolean).pop() ?? "");
+            }}
+            onCancel={() => setBrowsing(false)}
+          />
+        )}
         <label>
           Territory
           <select className="input" value={size} onChange={(e) => setSize(Number(e.target.value) as 7 | 19 | 37)}>

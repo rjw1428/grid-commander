@@ -3,6 +3,7 @@ import type {
   CreateProjectBody,
   CreateTeamBody,
   CreateUnitBody,
+  DirListing,
   Message,
   OperatorMessageBody,
   Order,
@@ -104,6 +105,14 @@ export const api = {
   },
   settings: {
     patch: (b: PatchSettingsBody) => call<Settings>("PATCH", "/settings", b),
+  },
+  fs: {
+    dirs: (path?: string, hidden = false) => {
+      const p = new URLSearchParams();
+      if (path) p.set("path", path);
+      if (hidden) p.set("hidden", "1");
+      return call<DirListing>("GET", `/fs/dirs?${p}`);
+    },
   },
   push: {
     key: () => call<{ key: string | null }>("GET", "/push/vapid-public-key"),

@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import pino from "pino";
@@ -33,11 +34,15 @@ async function main() {
   // pnpm runs the script with cwd = packages/server; resolve relative paths against the invoking directory.
   const base = process.env.INIT_CWD ?? process.cwd();
   const configPath = resolve(base, env.FLEET_CONFIG);
-  const dbPath = resolve(base, env.FLEET_DB);
+  const inMemory = env.FLEET_DB === ":memory:";
+  const dbPath = inMemory ? env.FLEET_DB : resolve(base, env.FLEET_DB);
   const fleetRoot = env.FLEET_ROOT ? resolve(base, env.FLEET_ROOT) : base;
   if (!existsSync(configPath)) log.warn({ configPath }, "fleet config not found; starting with an empty fleet");
   const fleet = loadFleetConfig(configPath);
-  const token = env.FLEET_TOKEN ?? loadOrCreateToken(join(dirname(dbPath), "token"), log);
+  const token = env.FLEET_TOKEN ?? loadOrCreateToken(join(inMemory ? resolve(base, "data") : dirname(dbPath), "token"), log);
+  const browseRoots = env.FLEET_BROWSE_ROOTS
+    ? env.FLEET_BROWSE_ROOTS.split(",").map((p) => resolve(base, p.trim())).filter(Boolean)
+    : [...new Set([homedir(), fleetRoot])];
 
   const pushSender =
     env.VAPID_PUBLIC_KEY && env.VAPID_PRIVATE_KEY
@@ -62,6 +67,7 @@ async function main() {
   const clientDist = env.CLIENT_DIST ? resolve(env.CLIENT_DIST) : resolve(here, "../../client/dist");
   const app = await buildApp({
     token,
+    browseRoots,
     logLevel: env.LOG_LEVEL,
     hub,
     clientDist,

@@ -162,3 +162,29 @@ export const HealthSchema = z.object({
   units: z.number().int(),
 });
 export type Health = z.infer<typeof HealthSchema>;
+
+// ----------------------------------------------------------------------------- directory browser
+
+export const DirEntrySchema = z.object({
+  name: z.string(),
+  path: z.string(),
+  /** directory contains a .git folder */
+  git: z.boolean(),
+});
+export type DirEntry = z.infer<typeof DirEntrySchema>;
+
+export const DirListingSchema = z.object({
+  path: z.string(),
+  name: z.string(),
+  /** null at a browsable root */
+  parent: z.string().nullable(),
+  roots: z.array(z.string()),
+  git: z.boolean(),
+  entries: z.array(DirEntrySchema),
+});
+export type DirListing = z.infer<typeof DirListingSchema>;
+
+export const DirQuerySchema = z.object({
+  path: z.string().optional(),
+  hidden: z.enum(["0", "1"]).optional(),
+});

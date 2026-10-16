@@ -16,9 +16,11 @@ import {
   QuestionAnswerBodySchema,
   TranscriptQuerySchema,
   type Unit,
+  DirQuerySchema,
 } from "@gridcommander/shared";
 import type { ZodType } from "zod";
 import { badRequest } from "../errors.js";
+import { listDirs } from "./fsBrowse.js";
 import type { Hub } from "../hub.js";
 
 function parse<T>(schema: ZodType<T>, data: unknown): T {
@@ -33,6 +35,8 @@ function parse<T>(schema: ZodType<T>, data: unknown): T {
 const id = (p: unknown) => (p as { id: string }).id;
 
 export interface RestDeps {
+  /** directories the working-directory picker may browse (none → picker disabled) */
+  browseRoots?: string[];
   hub: Hub;
   /** M5: operator messages + broadcast go through the comms broker when present. */
   comms?: {
@@ -237,6 +241,12 @@ export function registerRest(api: FastifyInstance, deps: RestDeps): void {
   });
 
   api.get("/unit-types", async () => hub.snapshot().unitTypes);
+
+  // ------------------------------------------------------------------ directory browser
+  api.get("/fs/dirs", async (req) => {
+    const q = parse(DirQuerySchema, req.query ?? {});
+    return listDirs(deps.browseRoots ?? [], q.path, q.hidden === "1");
+  });
 }
 
 export function transcriptToMarkdown(name: string, entries: import("@gridcommander/shared").TranscriptEntry[]): string {

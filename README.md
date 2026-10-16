@@ -69,6 +69,7 @@ Then open Commands → Settings on the phone and tap "Enable push on this device
 | `FLEET_IDLE_ALERT_MS` | `120000` | idle watchdog threshold |
 | `FLEET_DONE_AUTOACK_MS` | `600000` | auto-acknowledge `done` after this long |
 | `FLEET_MAX_UNITS` | `24` | cap on concurrently running sessions |
+| `FLEET_BROWSE_ROOTS` | home dir + fleet root | comma-separated directories the project "Browse…" picker may list (directories only; `..` cannot escape, symlinked folders inside a root are followed) |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | optional | Web Push |
 | `ANTHROPIC_API_KEY` | optional | passed through to the SDK |
 

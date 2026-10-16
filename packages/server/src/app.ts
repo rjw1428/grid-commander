@@ -17,6 +17,7 @@ export interface AppDeps {
   clientDist?: string;
   comms?: RestDeps["comms"];
   push?: RestDeps["push"];
+  browseRoots?: string[];
 }
 
 export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
@@ -50,7 +51,7 @@ export async function buildApp(deps: AppDeps): Promise<FastifyInstance> {
   await app.register(
     async (api) => {
       api.addHook("onRequest", makeAuthHook(deps.token));
-      registerRest(api, { hub, comms: deps.comms, push: deps.push });
+      registerRest(api, { hub, comms: deps.comms, push: deps.push, browseRoots: deps.browseRoots });
     },
     { prefix: "/api" },
   );
