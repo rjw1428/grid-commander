@@ -23,6 +23,7 @@ export function Labels({ units, projects, selection }: { units: Unit[]; projects
             else projectLabelNodes.delete(p.id);
           }}
         >
+          <i className="flag-sw" />
           {p.name}
         </div>
       ))}
