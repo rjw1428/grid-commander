@@ -16,6 +16,16 @@ pnpm install
 pnpm dev                                # server on :7777 (tsx watch) + Vite on :5173
 ```
 
+`pnpm dev` is the hot-reloading way to run Grid Commander while it is being changed:
+
+| You edit | What happens |
+|---|---|
+| `packages/client/src/**` | Vite hot-module reload: styles and components update in the open browser, no refresh |
+| `packages/server/src/**` | `tsx watch` restarts the server in about a second; the browser reconnects on its own |
+| `packages/shared/src/**` | `tsc -w` re-emits; server and client pick it up as above |
+
+A server restart stops any running unit sessions; they come back `offline` and resume their Claude session on the next order. Vite listens on all interfaces (`--host`), so the phone can use `http://<mac-ip>:5173` too; the API and WebSocket are proxied to the server, which stays on 127.0.0.1. Use `pnpm build && pnpm start` only for a long-lived fleet where you do not want restarts.
+
 Open http://localhost:5173 and paste the token when prompted. The token is read from `FLEET_TOKEN`, or, when that is unset, generated once and kept in `data/token`:
 
 ```bash
