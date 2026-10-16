@@ -35,6 +35,18 @@ export function App() {
   const commands = useCommands();
   useAlertSounds();
 
+  // A server restart (hot reload, deploy) drops the socket for about a second; only announce
+  // "offline" once the gap is long enough to mean something.
+  const [offlineLong, setOfflineLong] = useState(false);
+  useEffect(() => {
+    if (canCommand) {
+      setOfflineLong(false);
+      return;
+    }
+    const t = window.setTimeout(() => setOfflineLong(true), 2500);
+    return () => window.clearTimeout(t);
+  }, [canCommand]);
+
   useEffect(() => {
     void registerPwa();
     return persistSnapshots();
@@ -193,7 +205,7 @@ export function App() {
         <Toasts />
         {mode === "move" && <div className="mode-banner">Move mode: {mobile ? "tap" : "click"} a free hex · {mobile ? "" : "Esc to cancel"}</div>}
         {mode === "territory" && <div className="mode-banner">Territory mode: {mobile ? "tap" : "click"} a faint hex to claim it, an owned hex to release it{mobile ? "" : " · Esc to finish"}</div>}
-        {!canCommand && hasSnapshot && <div className="mode-banner offline">Offline: showing the last known state, commands disabled</div>}
+        {offlineLong && hasSnapshot && <div className="mode-banner offline">Offline: showing the last known state, commands disabled</div>}
       </main>
       {mobile ? <TabBar /> : <Tray />}
     </div>

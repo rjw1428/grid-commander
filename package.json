@@ -17,6 +17,7 @@
     "cli": "pnpm --filter @gridcommander/server cli",
     "start": "pnpm --filter @gridcommander/server start",
     "stop": "node scripts/stop.mjs",
+    "host:restart": "node scripts/stop.mjs --host-only",
     "start:demo": "FLEET_DEMO=1 FLEET_TOKEN=${FLEET_TOKEN:-demo-token-12345678} pnpm start"
   },
   "devDependencies": {

@@ -69,7 +69,8 @@ function open() {
 
 function schedule() {
   attempt += 1;
-  const delay = Math.min(30_000, 1000 * 2 ** Math.min(attempt, 5)) * (0.75 + Math.random() * 0.5);
+  // a hot-reload restart is back within a second: retry fast first, then back off to 30 s
+  const delay = Math.min(30_000, 400 * 2 ** Math.min(attempt, 7)) * (0.75 + Math.random() * 0.5);
   timer = window.setTimeout(() => {
     timer = null;
     if (!stopped) open();

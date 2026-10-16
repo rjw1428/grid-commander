@@ -24,6 +24,12 @@ const EnvSchema = z.object({
   FLEET_E2E: z.string().optional(),
   /** 1 = scripted demo runtime instead of the Agent SDK (no Claude needed). */
   FLEET_DEMO: z.string().optional(),
+  /** 1 = run sessions inside the web server process (they die with it). Default: the detached unit host. */
+  FLEET_INPROC: z.string().optional(),
+  /** Unix socket of the unit host. Default: `<data dir>/host.sock`. */
+  FLEET_HOST_SOCKET: z.string().optional(),
+  /** Host exits after this long with no hub attached and no units running (ms). */
+  FLEET_HOST_IDLE_EXIT_MS: z.coerce.number().int().nonnegative().optional(),
   LOG_LEVEL: z.string().default("info"),
   CLIENT_DIST: z.string().optional(),
 });

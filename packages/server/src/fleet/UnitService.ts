@@ -97,6 +97,42 @@ export class UnitService extends Emitter<UnitServiceEvents> {
     return started;
   }
 
+  /**
+   * Adopt a runtime that is already running (a unit the host kept alive across a hub restart).
+   * `replay` re-emits the host's buffered events and current state once listeners are wired.
+   */
+  attach(id: string, rt: Runtime & { replay(): void }): Unit {
+    const { fleet } = this.#deps;
+    const unit = fleet.getUnit(id);
+    if (this.runtimes.has(id)) throw conflict("already_running", `unit "${unit.name}" is already running`);
+    this.runtimes.set(id, rt);
+    this.#wire(id, rt);
+    rt.replay();
+    if (!this.runtimes.has(id)) return fleet.getUnit(id); // the replay ended with an exit
+    const attached = fleet.getUnit(id);
+    if (attached.status === "offline") {
+      // no status event in the replay (host snapshot said idle/working…): project the runtime's view
+      const next = fleet.updateUnit(id, { status: rt.status, statusSince: Date.now() });
+      this.#deps.bus.publish({ type: "unit.upsert", unit: next });
+      this.emit("status", next, "offline");
+    }
+    const u = fleet.getUnit(id);
+    this.emit("started", u);
+    return u;
+  }
+
+  /** Forget every runtime without stopping it (the host keeps the sessions). Unit status is left as is. */
+  detachAll(): string[] {
+    const ids = [...this.runtimes.keys()];
+    for (const id of ids) {
+      this.#unwire(id);
+      this.runtimes.delete(id);
+      this.#clearAutoAck(id);
+      this.#flushTranscript(id);
+    }
+    return ids;
+  }
+
   async stop(id: string): Promise<Unit> {
     const rt = this.runtimes.get(id);
     const unit = this.#deps.fleet.getUnit(id);

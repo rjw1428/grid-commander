@@ -18,6 +18,10 @@ export interface OrderServiceDeps {
   autoStartOnOrder?: boolean;
 }
 
+/** Prepended when an order is resubmitted after the session died mid-turn; the resumed session already holds the partial work. */
+export const RESUMED_ORDER_NOTE =
+  "[Grid Commander] Your previous attempt at the order below was interrupted by a restart and your session was resumed. Check what you already did before continuing; do not redo finished steps.";
+
 interface OrderEvents {
   /** The unit reached a turn boundary with nothing queued (CommsBroker delivers the inbox here). */
   queueEmpty: (unitId: string) => void;
@@ -38,7 +42,10 @@ export class OrderService extends Emitter<OrderEvents> {
   constructor(deps: OrderServiceDeps) {
     super((err, ev) => deps.log.error({ err, ev }, "OrderService listener threw"));
     this.#deps = deps;
-    deps.units.on("turnFinished", (unit) => void this.drain(unit.id));
+    deps.units.on("turnFinished", (unit, result) => {
+      deps.stores.orders.completeInFlight(unit.id, result.at);
+      void this.drain(unit.id);
+    });
     deps.units.on("status", (unit, prev) => {
       if ((unit.status === "idle" && prev !== "idle") || unit.status === "done") void this.drain(unit.id);
     });
@@ -47,6 +54,24 @@ export class OrderService extends Emitter<OrderEvents> {
 
   pending(unitId: string): Order[] {
     return this.#deps.stores.orders.pending(unitId);
+  }
+
+  /**
+   * Settle orders that were in flight when the session went away. A unit that was mid-turn gets the
+   * order back at the front of its queue (resubmitted once it resumes); otherwise the order is closed.
+   * Returns how many orders were requeued.
+   */
+  recover(unitId: string, opts: { wasMidTurn: boolean }): number {
+    const { stores } = this.#deps;
+    let n = 0;
+    if (opts.wasMidTurn) {
+      n = stores.orders.requeueInFlight(unitId);
+      if (n) this.#deps.log.info({ unitId, requeued: n }, "in-flight order handed back to the queue");
+    } else {
+      stores.orders.completeInFlight(unitId, Date.now());
+    }
+    this.#syncQueueLength(unitId);
+    return n;
   }
 
   async enqueue(
@@ -102,7 +127,7 @@ export class OrderService extends Emitter<OrderEvents> {
     const { units, stores } = this.#deps;
     if (!units.canAcceptTurn(unitId)) return;
     if (this.#preempt?.(unitId)) return;
-    const next = stores.orders.pending(unitId)[0];
+    const next = stores.orders.pendingDetailed(unitId)[0];
     if (!next) {
       this.emit("queueEmpty", unitId);
       return;
@@ -113,7 +138,8 @@ export class OrderService extends Emitter<OrderEvents> {
       stores.orders.markSubmitted(next.id, at);
       this.#syncQueueLength(unitId);
       const source: OrderSource = next.source === "operator" && at - next.createdAt > 1500 ? "queue" : next.source;
-      const p = units.submit(unitId, next.text, source);
+      const text = next.attempts > 0 ? `${RESUMED_ORDER_NOTE}\n\n${next.text}` : next.text;
+      const p = units.submit(unitId, text, source);
       this.emit("submitted", { ...next, submittedAt: at });
       p.catch((err) => this.#deps.log.warn({ err, unitId }, "turn failed"));
     } catch (err) {

@@ -21,10 +21,12 @@ pnpm dev                                # server on :7777 (tsx watch) + Vite on 
 | You edit | What happens |
 |---|---|
 | `packages/client/src/**` | Vite hot-module reload: styles and components update in the open browser, no refresh |
-| `packages/server/src/**` | `tsx watch` restarts the server in about a second; the browser reconnects on its own |
+| `packages/server/src/**` | `tsx watch` restarts the web server in about a second; the browser reconnects on its own |
 | `packages/shared/src/**` | `tsc -w` re-emits; server and client pick it up as above |
 
-A server restart stops any running unit sessions; they come back `offline` and resume their Claude session on the next order. Vite listens on all interfaces (`--host`), so the phone can use `http://<mac-ip>:5173` too; the API and WebSocket are proxied to the server, which stays on 127.0.0.1. Use `pnpm build && pnpm start` only for a long-lived fleet where you do not want restarts.
+Unit sessions do not live in the web server. They run in the **unit host**, a detached process the server launches on first use (`data/host.pid`, log in `data/host.log`, Unix socket `data/host.sock`) and attaches to over a socket. Restarting the web server, by hot reload, `Ctrl-C` + `pnpm start`, or a crash, leaves every Claude session running; the new server re-attaches and replays whatever happened while it was down, so transcripts and results are not lost. Orders are tracked to completion: if a session ever does die mid-order (host restart, machine reboot), the order goes back to the front of the unit's queue and is resubmitted, with a note, once the session resumes.
+
+Vite listens on all interfaces (`--host`), so the phone can use `http://<mac-ip>:5173` too; the API and WebSocket are proxied to the server, which stays on 127.0.0.1.
 
 Open http://localhost:5173 and paste the token when prompted. The token is read from `FLEET_TOKEN`, or, when that is unset, generated once and kept in `data/token`:
 
@@ -34,13 +36,17 @@ open "http://localhost:5173/?token=$(cat data/token)"
 
 `fleet.json` is optional. With no file (or an empty one) the map starts as open water: found projects, reshape their territories and recruit units from the UI, and the server writes the result back to `fleet.json`. `fleet.example.json` shows the hand-written form if you prefer to start from a file (edit its `cwd` paths to real repos first).
 
-Production-style single process:
+Production-style:
 
 ```bash
 pnpm build
 FLEET_TOKEN=... FLEET_HOST=0.0.0.0 pnpm start   # serves client from packages/client/dist on :7777
-pnpm stop                                       # kills whatever listens on FLEET_PORT (default 7777)
+pnpm stop --keep-units                          # stop the web server only; sessions keep running in the host
+pnpm host:restart                               # stop the host (sessions end); the running server relaunches it and resumes every unit
+pnpm stop                                       # stop both: web server and unit host
 ```
+
+The host runs the code it was started with. After changing anything under `packages/server/src/runtime/` or `src/host/`, run `pnpm host:restart` when the fleet is at a stopping point: units are resumed by session id and interrupted orders are resubmitted, but the turn that was running is redone. Everything else (REST, WebSocket, comms, alerts, the UI) is picked up by a plain server restart with no effect on units. Set `FLEET_INPROC=1` to run sessions inside the web server instead (the pre-host behaviour; the Playwright suite uses it).
 
 ## Demo mode (no Claude needed)
 
@@ -75,7 +81,10 @@ Then open Commands → Settings on the phone and tap "Enable push on this device
 | `FLEET_HOST` | `127.0.0.1` | bind address; `0.0.0.0` for LAN/Tailscale |
 | `FLEET_PORT` | `7777` | |
 | `FLEET_CONFIG` | `./fleet.json` | fleet definition; written back when you edit from the UI |
-| `FLEET_DB` | `./data/fleet.db` | SQLite file |
+| `FLEET_DB` | `./data/fleet.db` | SQLite file; its directory is the data dir (token, host pid/log/socket) |
+| `FLEET_INPROC` | unset | `1` runs sessions inside the web server instead of the unit host (they stop when it stops) |
+| `FLEET_HOST_SOCKET` | `<data dir>/host.sock` | unit host socket; falls back to the temp dir when the path exceeds the OS limit (~100 bytes) |
+| `FLEET_HOST_IDLE_EXIT_MS` | `600000` | the host exits after this long with no server attached and no units running; `0` never |
 | `FLEET_IDLE_ALERT_MS` | `120000` | idle watchdog threshold |
 | `FLEET_DONE_AUTOACK_MS` | `600000` | auto-acknowledge `done` after this long |
 | `FLEET_MAX_UNITS` | `24` | cap on concurrently running sessions |
@@ -101,7 +110,7 @@ Paste the token once at the gate, or open `http://host:7777/?token=<FLEET_TOKEN>
 
 ```
 packages/shared   types + zod schemas + unit-types.json (everything that crosses the wire)
-packages/server   Fastify + WebSocket + Agent SDK runtime + SQLite
+packages/server   Fastify + WebSocket + SQLite (src/) and the unit host that owns the Agent SDK sessions (src/host/)
 packages/client   Vite + React + react-three-fiber + PWA
 docs/             spec and decisions
 ```

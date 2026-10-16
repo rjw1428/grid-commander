@@ -86,9 +86,14 @@ interface OrderRow {
   source: Order["source"];
   created_at: number;
   submitted_at: number | null;
+  completed_at: number | null;
+  attempts: number;
   turn_id: string | null;
   position: number;
 }
+
+/** An order plus how many times it was handed back to the queue after an interrupted turn. */
+export type PendingOrder = Order & { attempts: number };
 
 const rowToOrder = (r: OrderRow): Order => ({
   id: r.id,
@@ -108,11 +113,36 @@ export class OrderStore {
       .run(o.id, o.unitId, o.text, o.source, o.createdAt, o.submittedAt ?? null, o.turnId ?? null, position);
   }
   pending(unitId: string): Order[] {
+    return this.pendingDetailed(unitId).map(({ attempts: _a, ...o }) => o);
+  }
+  pendingDetailed(unitId: string): PendingOrder[] {
     return (
       this.db
         .prepare(`SELECT * FROM orders WHERE unit_id = ? AND submitted_at IS NULL ORDER BY position ASC, created_at ASC`)
         .all(unitId) as OrderRow[]
+    ).map((r) => ({ ...rowToOrder(r), attempts: r.attempts }));
+  }
+  /** Orders submitted to a session whose turn has not finished (at most one per unit in practice). */
+  inFlight(unitId: string): Order[] {
+    return (
+      this.db
+        .prepare(`SELECT * FROM orders WHERE unit_id = ? AND submitted_at IS NOT NULL AND completed_at IS NULL ORDER BY submitted_at ASC`)
+        .all(unitId) as OrderRow[]
     ).map(rowToOrder);
+  }
+  /** The unit's turn finished: close every in-flight order for it. */
+  completeInFlight(unitId: string, at: number): number {
+    return this.db.prepare(`UPDATE orders SET completed_at = ? WHERE unit_id = ? AND submitted_at IS NOT NULL AND completed_at IS NULL`).run(at, unitId).changes;
+  }
+  /**
+   * The session died mid-turn: hand in-flight orders back to the front of the queue so they are
+   * resubmitted when the unit resumes. Returns how many were requeued.
+   */
+  requeueInFlight(unitId: string): number {
+    const front = this.minPosition(unitId) - 1;
+    return this.db
+      .prepare(`UPDATE orders SET submitted_at = NULL, attempts = attempts + 1, position = ? WHERE unit_id = ? AND submitted_at IS NOT NULL AND completed_at IS NULL`)
+      .run(front, unitId).changes;
   }
   pendingAll(): Order[] {
     return (

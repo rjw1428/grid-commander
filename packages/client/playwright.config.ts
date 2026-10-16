@@ -25,6 +25,7 @@ export default defineConfig({
       LOG_LEVEL: "warn",
       CLIENT_DIST: resolve(here, "dist"),
       FLEET_DEMO: "1",
+      FLEET_INPROC: "1",
     },
     timeout: 30_000,
   },
